@@ -151,5 +151,5 @@ formSubmit.addEventListener('click', function (e){
     }).then(
       message => alert(message)
     );
-    document.getElementById('form').reset();
+    delay(1000).then(() => document.getElementById('form').reset());
 });
