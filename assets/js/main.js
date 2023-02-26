@@ -139,6 +139,8 @@ var formSubmit = document.getElementById('form__send')
 formSubmit.addEventListener('click', function (e){
     e.preventDefault()
     console.log("HIIII!!");
+    if(document.getElementById('form__text').value == "" || document.getElementById('form__name').value == "" || document.getElementById('form__email').value == "")
+        return;
     var messageBody = 'Project Details: <br> Email: ' + document.getElementById('form__email').value + '<br> <br>' + document.getElementById('form__text').value;
     Email.send({
         SecureToken : "98929d86-1354-4e67-a5b7-2ea646d34968",
@@ -149,4 +151,5 @@ formSubmit.addEventListener('click', function (e){
     }).then(
       message => alert(message)
     );
+    document.getElementById('form').reset();
 });
