@@ -10,7 +10,7 @@ export default function EmailComposer({ invoiceId, invoiceNo, to, client, busine
 }) {
   const isReceipt = documentType === "receipt";
   const [connection, setConnection] = useState<Connection | null>(null);
-  const [recipient, setRecipient] = useState(to);
+  const recipient = to;
   const [subject, setSubject] = useState(isReceipt ? `Payment receipt for invoice ${invoiceNo} from ${business}` : `Invoice ${invoiceNo} from ${business}`);
   const [message, setMessage] = useState(isReceipt
     ? `Hello ${client || "there"},\n\nThank you for your payment. Attached is your receipt confirming full payment for invoice ${invoiceNo}.\n\nBest regards,\n${business}`

@@ -57,7 +57,7 @@ export function ProductPreview({
         </div>
       ) : (
         <div className={styles.previewBody}>
-          <div className={styles.previewEyebrow}>YOU'RE INVITED</div>
+          <div className={styles.previewEyebrow}>YOU&apos;RE INVITED</div>
           <div className={styles.eventArt}>
             <span>
               GOOD

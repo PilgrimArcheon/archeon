@@ -8,23 +8,23 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "check:invoice-auth": "node scripts/check-invoice-auth.mjs",
-    "verify:invoice": "node scripts/verify-invoice-update.mjs",
-    "verify:invoice-gmail": "node scripts/verify-invoice-gmail.cjs",
-    "verify:invoice-receipts": "node scripts/verify-invoice-receipts.cjs"
+    "preflight": "node scripts/check-deploy-files.mjs",
+    "verify:invoice-receipts": "node scripts/verify-invoice-receipts.cjs",
+    "verify:invoice-gmail": "node scripts/verify-invoice-gmail.cjs"
   },
   "dependencies": {
-    "next": "^15.5.3",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "lucide-react": "^0.468.0",
     "@neondatabase/serverless": "^1.0.0",
     "jose": "^6.0.0",
+    "lucide-react": "^0.468.0",
+    "next": "^15.5.24",
     "pdf-lib": "^1.17.1",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
     "zod": "^4.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
+    "@next/env": "^15.5.24",
     "@tailwindcss/postcss": "^4.1.13",
     "@types/node": "^22.18.6",
     "@types/react": "^19.1.13",
@@ -36,5 +36,8 @@
   },
   "engines": {
     "node": ">=20.9.0"
+  },
+  "overrides": {
+    "postcss": "^8.5.23"
   }
 }

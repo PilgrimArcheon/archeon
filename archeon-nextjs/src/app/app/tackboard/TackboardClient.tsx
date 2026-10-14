@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import {
   allTasksComplete, COLORS, freshId, makeBoard, makeNote, progress, readStore,
-  STATUSES, type Note, type NoteColor, type NoteStatus, type TackboardData,
+  STATUSES, type Note, type NoteColor, type NoteStatus,
 } from "@/features/tackboard/model";
 import styles from "./tackboard.module.css";
 import { useTackCloud } from "@/features/tackboard/useTackCloud";
@@ -335,7 +335,7 @@ export default function TackboardClient() {
         <div className={styles.pageFoot}><span>Small things become big things. One note at a time.</span><span>tackboard. / built by <Link href="/">archeon</Link></span></div>
       </div>
     </main>
-    {syncConflict && <div className={styles.conflictPanel} role="alertdialog" aria-label="Cloud synchronization conflict"><strong>Changes from another device</strong><p>Your cloud board changed while this device was editing. Choose which version to keep. Loading the cloud version preserves your local draft in a browser recovery backup.</p><div><button onClick={() => chooseConflict("cloud")}>Use cloud version</button><button onClick={() => { if (window.confirm("Replace the newer cloud board with this device's board?")) chooseConflict("device"); }}>Keep this device's version</button></div></div>}
+    {syncConflict && <div className={styles.conflictPanel} role="alertdialog" aria-label="Cloud synchronization conflict"><strong>Changes from another device</strong><p>Your cloud board changed while this device was editing. Choose which version to keep. Loading the cloud version preserves your local draft in a browser recovery backup.</p><div><button onClick={() => chooseConflict("cloud")}>Use cloud version</button><button onClick={() => { if (window.confirm("Replace the newer cloud board with this device's board?")) chooseConflict("device"); }}>Keep this device&apos;s version</button></div></div>}
     {(lastArchived || notice || syncMessage) && <div className={styles.toast} role="status"><span>{syncMessage || notice || "A note was peeled off your board."}</span>{lastArchived && !syncMessage && <button onClick={() => restoreNote(lastArchived)}>Undo</button>}{(notice || syncMessage) && <button onClick={() => { setNotice(""); setSyncMessage(""); }} aria-label="Dismiss"><X size={14}/></button>}</div>}
     {dialog && <div className={styles.overlay} onMouseDown={e => { if (e.target === e.currentTarget) { setDialog(null); setDraft(null); } }}>
       <div className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="tack-dialog-title" onKeyDown={e => { if (e.key === "Escape") { setDialog(null); setDraft(null); } }}>

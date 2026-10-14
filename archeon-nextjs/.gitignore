@@ -1,12 +1,22 @@
-node_modules
-.next
-out
-desktop
+# Next.js
+node_modules/
+.next/
+out/
+.vercel/
+*.tsbuildinfo
+
+# Environment
 .env*
 !.env.example
-*.tsbuildinfo
-.DS_Store
-.vercel
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+
+# Desktop build output
+desktop/**/node_modules/
+desktop/**/dist/
+desktop/**/release/
+desktop/**/out/
+
+# Temporary backups
+_legacy-auth-backup/
+*.bak
+APPLY-FIX.ps1
+FIXED-FILES.json

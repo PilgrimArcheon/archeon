@@ -30,7 +30,7 @@ export default function ProductsPage() {
           </div>
         </article>)}</div>
       </section>
-      <div className={styles.closing}><div><div className={styles.eyebrow}>HAVE AN IDEA?</div><h2>Let's make something useful.</h2><p>From product strategy and interface design to a working prototype.</p></div><Link href="/contact" className={styles.primaryCta}>Start a conversation <ArrowRight size={16}/></Link></div>
+      <div className={styles.closing}><div><div className={styles.eyebrow}>HAVE AN IDEA?</div><h2>Let&apos;s make something useful.</h2><p>From product strategy and interface design to a working prototype.</p></div><Link href="/contact" className={styles.primaryCta}>Start a conversation <ArrowRight size={16}/></Link></div>
       <footer className={styles.footnote}><Link href="/product-design#work">← PRODUCT DESIGN</Link><span>Previews use illustrative sample data. Live demos will appear when ready.</span></footer>
     </div>
   </div>;

@@ -13,7 +13,6 @@ import {
   ChevronDown,
   CircleDollarSign,
   Clock3,
-  Copy,
   CreditCard,
   FileClock,
   FilePlus2,
@@ -24,7 +23,6 @@ import {
   LogOut,
   Mail,
   Menu,
-  MoreHorizontal,
   Pencil,
   Plus,
   Search,
@@ -77,7 +75,6 @@ async function callApi<T>(
     throw new Error(!data.success ? data.error.message : "The request failed.");
   return data.data;
 }
-const localDate = () => new Date().toLocaleDateString("en-CA");
 const humanDate = (d: string) =>
   new Date(`${d}T12:00:00Z`).toLocaleDateString("en-GB", {
     day: "2-digit",
@@ -180,7 +177,7 @@ function InvoiceDashboard() {
       if (!payload || payload.type !== "sent" || typeof payload.invoiceId !== "string") return;
       const sentAt = new Date().toISOString();
       setInvoices(previous => previous.map(item => item.id === payload.invoiceId ? { ...item, status: "sent", sentAt } : item));
-      setEditing(previous => previous?.id === payload.invoiceId ? { ...previous, status: "sent", sentAt } : previous);
+      setEditing(previous => previous && previous.id === payload.invoiceId ? { ...previous, status: "sent", sentAt } : previous);
     };
     return () => channel.close();
   }, []);

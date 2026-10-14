@@ -221,7 +221,6 @@ export function ClassicStudios() {
     observer.observe(track);
     return () => observer.disconnect();
     // Only initialize the infinite track when it mounts.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [count]);
 
   function scrollToStudio(index: number) {
@@ -269,7 +268,7 @@ export function ClassicStudios() {
       });
     }
     const children = Array.from(track.children) as HTMLElement[];
-    const nearest = children.reduce((best, el, i) => {
+    const nearest = children.reduce<{ index: number; distance: number }>((best, el, i) => {
       const distance = Math.abs(el.offsetLeft - first.offsetLeft - track.scrollLeft);
       return distance < best.distance ? { index: i, distance } : best;
     }, { index: count, distance: Infinity });

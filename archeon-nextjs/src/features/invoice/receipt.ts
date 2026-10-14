@@ -1,4 +1,4 @@
-import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf-lib";
+import { PDFDocument, StandardFonts, rgb, type PDFFont } from "pdf-lib";
 import { type Company, type Invoice, calculateInvoice, invoiceReference, isInvoicePaid, receiptReference } from "./models";
 
 const white = rgb(1, 1, 1);

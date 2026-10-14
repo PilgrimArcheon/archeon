@@ -88,7 +88,7 @@ export default function GameDevPage() {
           </p>
           <div className="pd-hero__lower">
             <p>
-              I'm Pilgrim, a gameplay programmer working across interactive
+              I&apos;m Pilgrim, a gameplay programmer working across interactive
               experiences, from the first prototype to playable builds. My work
               brings programming, game systems, and visual implementation
               together.
@@ -236,7 +236,7 @@ export default function GameDevPage() {
               </h2>
             </div>
             <p>
-              Teams and studios I've worked alongside on interactive experiences
+              Teams and studios I&apos;ve worked alongside on interactive experiences
               and digital projects.
             </p>
           </div>
@@ -253,18 +253,18 @@ export default function GameDevPage() {
       >
         <div className="container pd-split">
           <div>
-            <span className="pd-eyebrow">04 / LET'S BUILD</span>
+            <span className="pd-eyebrow">04 / LET&apos;S BUILD</span>
             <h2 id="gd-contact-heading">
               Game Dev idea?
               <br />
-              <span>Let's talk.</span>
+              <span>Let&apos;s talk.</span>
             </h2>
           </div>
           <div className="pd-contact__right">
             <Sparkles size={21} strokeWidth={1.3} />
             <p>
               Need a gameplay programmer, a prototype, or someone to help bring
-              a system to life? Tell me what you're building.
+              a system to life? Tell me what you&apos;re building.
             </p>
             <Link
               href="/contact"

@@ -105,7 +105,7 @@ export default function ExtensionInstallClient() {
           </div>
 
           {mobile && <div className={styles.notice}><Info size={17}/><p>This companion is built for desktop Firefox and Chrome. You can still use the full TackBoard web app on your phone.</p></div>}
-          {detected && browser === "unsupported" && !mobile && <div className={styles.notice}><Info size={17}/><p>Your browser wasn't recognized. Select Firefox or Chrome above to see the matching installation instructions.</p></div>}
+          {detected && browser === "unsupported" && !mobile && <div className={styles.notice}><Info size={17}/><p>Your browser wasn&apos;t recognized. Select Firefox or Chrome above to see the matching installation instructions.</p></div>}
 
           <div className={styles.installAction}>
             {isPublished ? <>
@@ -124,7 +124,7 @@ export default function ExtensionInstallClient() {
           <ol className={styles.stepList}>
             {isFirefox ? <>
               <li><span>01</span><p>Download and extract the Firefox ZIP. Leave the extracted folder somewhere you can find it.</p></li>
-              <li><span>02</span><div><p>Open a <strong>new Firefox tab</strong>. Paste this exact address into the <strong>address bar at the top</strong>, then press Enter (don't search the web for it):</p>
+              <li><span>02</span><div><p>Open a <strong>new Firefox tab</strong>. Paste this exact address into the <strong>address bar at the top</strong>, then press Enter (don&apos;t search the web for it):</p>
                 <div className={styles.codeRow}><code>about:debugging#/runtime/this-firefox</code><button type="button" onClick={copyDebugAddress} aria-label="Copy Firefox debugging address">{copied ? <Check size={16}/> : <ClipboardCopy size={16}/>}<span>{copied ? "Copied" : "Copy"}</span></button></div></div></li>
               <li><span>03</span><p>Under <strong>This Firefox</strong>, select <strong>Load Temporary Add-on…</strong> and choose <code>manifest.json</code> inside the extracted folder.</p></li>
               <li><span>04</span><p>Click the TackBoard toolbar icon. In the launcher, select <strong>Open TackBoard window</strong>. If the window stays hidden, click <strong>Reset hidden window</strong>. Use Settings to pair your account.</p></li>
@@ -135,7 +135,7 @@ export default function ExtensionInstallClient() {
               <li><span>04</span><p>Pin TackBoard to the toolbar, click it to open the launcher, then select <strong>Open TackBoard window</strong>. If hidden, use <strong>Reset hidden window</strong>, or open in a tab.</p></li>
             </>}
           </ol>
-          {isFirefox && <p className={styles.temporary}><Info size={16}/> Firefox removes temporary add-ons after you exit the browser. We'll replace this testing flow with a signed, permanent add-on when TackBoard is published.</p>}
+          {isFirefox && <p className={styles.temporary}><Info size={16}/> Firefox removes temporary add-ons after you exit the browser. We&apos;ll replace this testing flow with a signed, permanent add-on when TackBoard is published.</p>}
         </section>}
 
         <section className={styles.connectCard}>

@@ -3,7 +3,6 @@ import Link from "next/link";
 import {
   ArrowRight,
   ArrowUpRight,
-  Download,
   Github,
   Linkedin,
 } from "lucide-react";
@@ -28,7 +27,7 @@ export function HomeAbout() {
             <span className="platform-eyebrow__index">01 /</span> ABOUT ME
           </span>
           <Link href="/contact" className="platform-text-link">
-            Let's connect <ArrowUpRight size={16} />
+            Let&apos;s connect <ArrowUpRight size={16} />
           </Link>
         </div>
         <div className="platform-about__grid">
@@ -48,14 +47,14 @@ export function HomeAbout() {
               Product Designer<span>.</span>
             </h2>
             <p>
-              I'm Daniel Shontan; you can call my Pilgrim. I build digital experiences from both sides of the screen: the
+              I&apos;m Daniel Shontan; you can call my Pilgrim. I build digital experiences from both sides of the screen: the
               systems that make interactive worlds work, and the interfaces that
               help people use products with ease.
             </p>
             <p>
               From Gameplay and Real-time systems to Product thinking,
               prototyping and visual design, my work combines technical
-              problem-solving with a focus on how things feel to use. I've
+              problem-solving with a focus on how things feel to use. I&apos;ve
               collaborated with studios, teams and clients across PC, mobile,
               web, multiplayer and AR/VR projects.
             </p>

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>TackBoard · Desktop</title><link rel="stylesheet" href="style.css"></head>
+<body data-theme="dark" data-mode="compact">
+<div class="window" id="window">
+  <header class="chrome">
+    <div class="brand" id="windowDrag"><div class="mark">▤</div><div><strong>tackboard<span>.</span></strong><small>BY ARCHEON / DESKTOP</small></div></div>
+    <div class="windowButtons">
+      <button id="themeBtn" title="Switch theme" aria-label="Switch color theme">☾</button>
+      <button id="pinBtn" title="Keep on top" aria-label="Toggle always on top">♧</button>
+      <button id="expandBtn" title="Expand or compact" aria-label="Expand board">⤢</button>
+      <button id="closeBtn" title="Hide to tray" aria-label="Hide TackBoard">×</button>
+    </div>
+  </header>
+  <section class="workspaceHeader">
+    <div class="eyebrow"><span class="live"></span><span id="connection">LOCAL BOARD</span><span class="hairline"></span><span id="noteCount">00 NOTES</span></div>
+    <div class="welcome"><div><h1>Stick to it<span>.</span></h1><p>Little things, moving forward.</p></div><button id="settingsBtn" class="iconFrame" title="Connection settings">⚙</button></div>
+    <div class="boardRow"><select id="boards" aria-label="Choose board"></select><button class="lightButton" id="newBoardBtn" title="New board" aria-label="New board">＋</button><button class="lightButton" id="archiveBtn" title="Toggle completed notes">▣</button></div>
+  </section>
+  <main class="canvasWrap">
+    <div class="boardHeadline"><span>◈ &nbsp; <span id="boardMode">THE NOTE STACK</span></span><span id="quietSync" title="Cloud sync state">LOCAL</span></div>
+    <div class="boardCanvas" id="canvas"><div class="notes" id="notes"></div></div>
+  </main>
+  <footer class="toolbar"><form id="quickAdd"><label class="srOnly" for="quickTitle">New sticky note</label><input type="text" id="quickTitle" maxlength="90" placeholder="Write a new sticky note…" autocomplete="off"><button type="submit" aria-label="Create note">＋</button></form><button class="footerIcon" title="Open full TackBoard in browser" id="webBtn">↗</button></footer>
+  <div class="footnote">YOUR BOARD, RIGHT WHERE YOU NEED IT. <span id="footSync"></span></div>
+</div>
+<div class="modalBackdrop hidden" id="modalBackdrop"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modalHead"><h2 id="modalTitle">Edit sticky note</h2><button id="modalClose" aria-label="Close dialog">×</button></div>
+  <div id="noteEditor" class="modalBody">
+    <label>NOTE TITLE<input id="editTitle" type="text" maxlength="90" placeholder="Note title"></label>
+    <label>DESCRIPTION<textarea id="editBody" rows="3" maxlength="1200" placeholder="Anything to remember…"></textarea></label>
+    <div class="twoFields"><label>COLOR<select id="editColor"><option value="butter">Butter</option><option value="mint">Mint</option><option value="lilac">Lilac</option><option value="rose">Rose</option><option value="sky">Sky</option><option value="paper">Paper</option></select></label><label>STATUS<select id="editStatus"><option value="planned">Planned</option><option value="active">In progress</option><option value="review">Review</option><option value="done">Done</option></select></label></div>
+    <div class="tasksTitle">TASKS <span id="taskCount"></span></div><div id="taskEditor" class="taskEditor"></div>
+    <form id="taskForm"><input id="taskText" type="text" maxlength="180" placeholder="Add a task…"><button type="submit">＋</button></form>
+    <div class="modalActions"><button id="archiveNote" type="button" class="mutedButton">Move to completed</button><button id="saveNote" type="button" class="solidButton">Done editing ↗</button></div>
+  </div>
+  <div id="settingsPanel" class="modalBody hidden">
+    <p class="settingsIntro">Connect once using a device key generated in your Archeon account. No password stored in TackBoard Desktop.</p>
+    <label>SERVER<select id="server"><option value="https://archeon.vercel.app">archeon.vercel.app</option><option value="http://localhost:3000">Local development</option></select></label>
+    <label>PAIRING KEY<input type="password" id="pairingKey" autocomplete="off" spellcheck="false" placeholder="tb_…"></label>
+    <p class="hint">In the TackBoard website, choose <strong>Desktop companion</strong> → <strong>Generate pairing key</strong>. Paste it here.</p>
+    <p id="pairFeedback" class="feedback" role="status"></p>
+    <div class="modalActions"><button id="disconnect" class="mutedButton">Disconnect device</button><button id="connectBtn" class="solidButton">Connect cloud ↗</button></div>
+    <button id="webSettings" class="webSettings">Open TackBoard website ↗</button>
+  </div>
+</section></div>
+<script src="core-browser.js"></script><script src="renderer.js"></script>
+</body></html>

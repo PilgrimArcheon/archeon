@@ -1,7 +1,5 @@
 import { randomBytes, scrypt as scryptCallback, timingSafeEqual } from "node:crypto";
-import { promisify } from "node:util";
 
-const scrypt = promisify(scryptCallback);
 const SALT_SIZE = 16;
 const KEY_SIZE = 64;
 const COST = 32768;
@@ -15,7 +13,14 @@ export function validPassword(value: unknown): value is string {
 }
 
 async function derive(password: string, salt: Buffer): Promise<Buffer> {
-  return (await scrypt(password, salt, KEY_SIZE, { N: COST, r: 8, p: 1, maxmem: MAXMEM })) as Buffer;
+  // The callback API accepts the scrypt cost parameters; promisify's overload
+  // does not expose that options argument correctly in every @types/node version.
+  return new Promise<Buffer>((resolve, reject) => {
+    scryptCallback(password, salt, KEY_SIZE, { N: COST, r: 8, p: 1, maxmem: MAXMEM }, (error, key) => {
+      if (error) reject(error);
+      else resolve(key);
+    });
+  });
 }
 
 export async function hashPassword(password: string): Promise<string> {

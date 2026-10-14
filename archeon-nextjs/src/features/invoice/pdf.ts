@@ -45,7 +45,9 @@ export async function createInvoicePDF(invoice: Invoice, company: Company): Prom
     return (0.2126*r + 0.7152*g + 0.0722*b) > 0.62; })();
   const accentInk = accentIsLight ? ink : white;
   const totals = calculateInvoice(invoice);
-  let page: PDFPage;
+  // Pre-create the first page so TypeScript can verify it exists when draw() runs.
+  // startPage(true) reuses it; subsequent pages are allocated as needed.
+  let page: PDFPage = pdf.addPage([W, H]);
   let y = 0;
 
   function draw(s: string, x: number, top: number, options: {font?: PDFFont; size?: number; color?: ReturnType<typeof rgb>; align?: "right"} = {}) {
@@ -84,7 +86,7 @@ export async function createInvoicePDF(invoice: Invoice, company: Company): Prom
     return at;
   }
   function startPage(first = false) {
-    page = pdf.addPage([W, H]);
+    if (!first) page = pdf.addPage([W, H]);
     if (first) {
       if (layout === "classic") {
         page.drawRectangle({ x: 0, y: H - 170, width: W, height: 170, color: rgb(.055, .065, .095) });
