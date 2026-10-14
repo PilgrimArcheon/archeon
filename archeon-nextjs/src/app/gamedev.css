@@ -1,0 +1,25 @@
+/* Game Development: the same visual system and section structure as Product Design. */
+.gd-page .gd-hero h1 { font-size: clamp(3.7rem, 9.8vw, 9.3rem); white-space: normal; }
+.gd-page .gd-hero__art { opacity: .22; }
+.gd-page .gd-practice { min-height: 370px; }
+.gd-practice__skills { display: block; border-top: 1px solid var(--stroke); margin-top: auto; padding-top: 16px; color: var(--text-color-light); font-size: .64rem; font-weight: 700; letter-spacing: .08em; }
+.gd-section-end { margin-top: 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+.gd-section-end > span { color: var(--text-color-light); font-size: .61rem; letter-spacing: .13em; font-weight: 700; }
+.gd-case__links { display: flex; gap: 18px; flex-wrap: wrap; margin-top: auto; padding-top: 20px; border-top: 1px solid var(--stroke); }
+.gd-case__links .pd-text-link { font-size: .69rem; }
+.gd-case .pd-case__media { display: block; }
+.gd-case h3 a { color: var(--title-color); }
+.gd-studios { background: color-mix(in srgb, var(--container-color) 55%, transparent); }
+.gd-studios__carousel .jobs.section { padding: 0; }
+.gd-studios__carousel .jobs > .section__subtitle, .gd-studios__carousel .jobs > .section__title { display: none; }
+.gd-studios__carousel .jobs__container.container { width: 100%; max-width: none; margin-inline: 0; }
+.gd-studios__carousel .jobs__viewport { overflow: hidden; }
+.gd-studios__carousel .jobs__card { background: var(--container-color); border: 1px solid var(--stroke); border-radius: 4px; min-height: 230px; padding: 28px; }
+.gd-studios__carousel .jobs__track { gap: 14px; }
+.gd-studios__carousel .jobs__track > .jobs__card { flex-basis: calc((100% - 28px) / 3); }
+.gd-studios__carousel .jobs__img { width: 58px; height: 58px; object-fit: contain; filter: none !important; }
+.gd-studios__carousel .jobs__name { font-size: 1rem; }
+.gd-studios__carousel .jobs__description { font-size: .77rem; line-height: 1.7; }
+.gd-studios__carousel .jobs__pagination { margin-top: 28px; }
+@media (max-width: 900px) { .gd-studios__carousel .jobs__track > .jobs__card { flex-basis: calc((100% - 14px) / 2); } }
+@media (max-width: 620px) { .gd-page .gd-hero h1 { font-size: clamp(3.05rem, 12vw, 5rem); } .gd-page .gd-practice { min-height: 290px; } .gd-studios__carousel .jobs__track > .jobs__card { flex-basis: 88%; } .gd-studios__carousel .jobs__card { padding: 22px; } }

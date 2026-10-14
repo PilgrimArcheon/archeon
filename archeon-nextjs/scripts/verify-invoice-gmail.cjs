@@ -1,0 +1,52 @@
+/** Run after npm install: npm run verify:invoice-gmail. No live Google/Neon credentials required. */
+const fs = require('node:fs');
+const path = require('node:path');
+const assert = require('node:assert/strict');
+const Module = require('node:module');
+const crypto = require('node:crypto');
+const ts = require('typescript');
+const root = path.join(__dirname, '..');
+const sourceFile = path.join(root, 'src/features/invoice/gmail.ts');
+const source = fs.readFileSync(sourceFile, 'utf8');
+const transpiled = ts.transpileModule(source, {
+  fileName: sourceFile, compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
+  reportDiagnostics: true,
+});
+assert.equal((transpiled.diagnostics || []).length, 0, 'TypeScript must parse');
+process.env.GOOGLE_CLIENT_ID = 'test-client-id';
+process.env.GOOGLE_CLIENT_SECRET = 'test-client-secret';
+process.env.ARCHEON_PUBLIC_URL = 'http://localhost:3000';
+process.env.ARCHEON_GMAIL_ENCRYPTION_KEY = crypto.randomBytes(32).toString('hex');
+const loaded = new Module(sourceFile, module);
+loaded.filename = sourceFile;
+loaded.paths = Module._nodeModulePaths(path.dirname(sourceFile));
+const originalRequire = loaded.require.bind(loaded);
+loaded.require = id => id === '@/features/auth/server' ? { database: () => { throw Error('Database should not be needed in this unit test'); } } : originalRequire(id);
+loaded._compile(transpiled.outputText, sourceFile);
+const gmail = loaded.exports;
+const flow = { state: gmail.makeState(), verifier: gmail.makeCodeVerifier(), userId: crypto.randomUUID(), invoiceId: crypto.randomUUID(), issuedAt: Date.now() };
+const sealed = gmail.sealGmailFlow(flow);
+assert.deepEqual(gmail.openGmailFlow(sealed), flow, 'OAuth cookie round-trip');
+const altered = sealed.slice(0, -2) + (sealed.endsWith('AA') ? 'BB' : 'AA');
+assert.equal(gmail.openGmailFlow(altered), null, 'Tampered OAuth cookie rejected');
+assert.equal(gmail.openGmailFlow(gmail.sealGmailFlow({ ...flow, issuedAt: Date.now() - 720_000 })), null, 'Expired OAuth cookie rejected');
+const consent = new URL(gmail.googleConsentUrl(flow.state, flow.verifier));
+assert.equal(consent.searchParams.get('redirect_uri'), 'http://localhost:3000/api/apps/invoice/gmail/callback');
+assert.equal(consent.searchParams.get('code_challenge_method'), 'S256');
+assert.ok(consent.searchParams.get('scope').includes('https://www.googleapis.com/auth/gmail.send'));
+assert.ok(!consent.searchParams.get('scope').includes('gmail.modify'));
+const secret = 'random refresh token secret';
+assert.equal(gmail.decryptRefreshToken(gmail.encryptRefreshToken(secret)), secret, 'Refresh token encryption round-trip');
+const raw = gmail.buildMimeMail({ from: 'creator@gmail.com', to: 'client@example.com', subject: 'Invoice TEST-4', message: 'Please find your invoice attached.', filename: 'invoice.pdf', pdf: Uint8Array.from([37,80,68,70,45]) });
+const mime = Buffer.from(raw, 'base64url').toString('utf8');
+assert.ok(mime.includes('To: <client@example.com>'));
+assert.ok(mime.includes('Content-Type: application/pdf'));
+assert.ok(mime.includes('JVBERi0='), 'PDF attachment data is in MIME');
+assert.ok(!source.includes('gmail.readonly') && !source.includes('gmail.modify'), 'Minimal Gmail scope only');
+console.log('✓ Gmail OAuth state, PKCE, token encryption and PDF MIME attachment checks passed.');
+const models = fs.readFileSync(path.join(root, 'src/features/invoice/models.ts'), 'utf8');
+const pdf = fs.readFileSync(path.join(root, 'src/features/invoice/pdf.ts'), 'utf8');
+for (const preset of ['classic','minimal','modern']) assert.ok(models.includes(`"${preset}"`));
+assert.ok(pdf.includes('layout === "classic"') && pdf.includes('layout === "modern"') && pdf.includes('} else {'), 'PDF template rendering branches');
+for (const option of ['fontStyle','density','tableStyle','accent']) assert.ok(models.includes(option) && pdf.includes(option));
+console.log('✓ Invoice appearance settings are declared and consumed by the PDF renderer.');

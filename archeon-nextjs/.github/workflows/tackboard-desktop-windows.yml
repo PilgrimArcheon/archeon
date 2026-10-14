@@ -1,0 +1,39 @@
+name: TackBoard Desktop (Windows)
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'desktop/tackboard/**'
+      - 'archeon-nextjs/desktop/tackboard/**'
+      - '.github/workflows/tackboard-desktop-windows.yml'
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Locate desktop package
+        shell: pwsh
+        run: |
+          if (Test-Path 'archeon-nextjs/desktop/tackboard/package.json') {
+            'DESKTOP_DIR=archeon-nextjs/desktop/tackboard' | Out-File -FilePath $env:GITHUB_ENV -Append
+          } elseif (Test-Path 'desktop/tackboard/package.json') {
+            'DESKTOP_DIR=desktop/tackboard' | Out-File -FilePath $env:GITHUB_ENV -Append
+          } else { throw 'TackBoard desktop package not found' }
+      - name: Install desktop dependencies
+        working-directory: ${{ env.DESKTOP_DIR }}
+        run: npm install
+      - name: Run desktop model tests
+        working-directory: ${{ env.DESKTOP_DIR }}
+        run: npm test
+      - name: Package Windows installers
+        working-directory: ${{ env.DESKTOP_DIR }}
+        run: npm run dist:win
+      - name: Attach unsigned development builds
+        uses: actions/upload-artifact@v4
+        with:
+          name: tackboard-desktop-windows-unsigned
+          path: ${{ env.DESKTOP_DIR }}/dist/*.exe
+          if-no-files-found: error

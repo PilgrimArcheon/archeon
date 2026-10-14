@@ -1,0 +1,99 @@
+/* Tailwind remains available for future apps and additional pages. */
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-alt: var(--surface-alt);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --font-sans: var(--body-font);
+}
+
+:root {
+  color-scheme: dark;
+  --font-body: "Poppins", sans-serif;
+  --background: var(--body-color);
+  --foreground: var(--title-color);
+  --surface: var(--container-color);
+  --surface-alt: var(--container-color);
+  --muted: var(--text-color);
+  --subtle: var(--text-color-light);
+  --line: hsl(219, 16%, 29%);
+  --accent: var(--first-color);
+  --accent-strong: var(--first-color-alt);
+}
+:root[data-theme="light"] { color-scheme: light; --line: hsl(219, 12%, 87%); }
+
+/* Original page's 968px visual rhythm. Extra specificity keeps it separate
+   from the reusable Tailwind .container utility on future routes. */
+.original-site .container,
+.header .container,
+.footer .container {
+  width: calc(100% - 2rem);
+  max-width: 968px;
+  padding-left: 0;
+  padding-right: 0;
+  margin-inline: auto;
+}
+.original-site { color: var(--text-color); }
+.original-site .home__name { font-size: var(--h1-font-size); line-height: 1.2; }
+.original-site .home__here { display: block; font-size: var(--h3-font-size); }
+.original-site .work__card:last-child { min-height: auto; }
+.original-site .jobs__viewport { overflow: hidden; width: 100%; }
+.original-site .jobs__track { display: flex; gap: 24px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.original-site .jobs__track::-webkit-scrollbar { display: none; }
+.original-site .jobs__track > .jobs__card { flex: 0 0 100%; scroll-snap-align: start; min-width: 0; }
+.original-site .jobs__pagination { display: flex; justify-content: center; align-items: center; gap: 7px; }
+.original-site .jobs__dot { height: 7px; width: 7px; background: var(--text-color-light); border-radius: 50%; opacity: .65; }
+.original-site .jobs__dot[aria-current="true"] { background: var(--first-color); opacity: 1; }
+.original-site .services__button { border: 0; background: transparent; padding: 0; }
+.original-site .services__modal-content { max-height: 85dvh; overflow-y: auto; }
+.original-site .services__modal[open] { visibility: visible; opacity: 1; border: none; color: var(--text-color); width: auto; max-width: min(100% - 2rem, 500px); margin: auto; }
+.original-site .services__modal::backdrop { background: hsla(219, 28%, 16%, .75); }
+.original-site .services__modal-close { background: transparent; }
+.original-site .contact__form-feedback { margin: .7rem 0; font-size: var(--small-font-size); }
+.original-site .work__item { border: 0; background: transparent; }
+.original-site .work__item.active-work { background-color: var(--first-color); color: var(--body-color); }
+.original-site .home__img { object-fit: contain; object-position: bottom; }
+.original-site .jobs__container { max-width: min(800px, calc(100% - 2rem)); }
+.original-site .work__button, .original-site .services__button, .original-site .contact__button { text-align: left; }
+.original-site .skills__data { min-width: 0; }
+.original-site .skills__content { min-width: 0; }
+.original-site .contact__form-input::placeholder { color: var(--text-color-light); }
+.header { position: fixed; top: 0; }
+.header .nav__menu { left: 50%; right: auto; margin: 0; transform: translateX(-50%); max-width: 328px; width: calc(100% - 2rem); }
+.header .nav__list { margin: 0; }
+.header .nav__link { transition: color .2s, background .2s; }
+.header .change-theme { background: transparent; color: var(--title-color); border: 0; padding: .25rem; }
+.footer .footer__list, .footer .footer__social { margin: 0; }
+.footer .footer__copy { opacity: .8; }
+/* Make links, dialogs and focus management practical, without a restyle. */
+:focus-visible { outline: 2px solid var(--first-color); outline-offset: 3px; }
+html { scroll-padding-top: 4rem; }
+@media screen and (min-width: 576px) {
+  .original-site .jobs__track > .jobs__card { flex-basis: calc((100% - 24px) / 2); }
+}
+@media screen and (max-width: 360px) {
+  .original-site .work__filters { flex-wrap: wrap; }
+  .original-site .skills__content { padding: 1rem; }
+  .original-site .skills__box { column-gap: .6rem; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+.original-site .work__detail-link { display: inline-flex; align-items: center; gap: .25rem; margin-top: .5rem; font-size: var(--small-font-size); color: var(--text-color); }
+.original-site .work__detail-link:hover { color: var(--first-color); }
+.original-site .work__card img { display:block; width:100%; max-width:100%; height:auto; aspect-ratio:auto; object-fit:initial; }
+.original-site .simple-page { padding-top: 7rem; padding-bottom: 4rem; min-height: 70vh; }
+.original-site .simple-page .section__title { margin-bottom: 2.5rem; }
+.original-site .simple-page-card { background: var(--container-color); padding: 1.5rem; border-radius: 1.25rem; }
+.original-site .simple-page-link { color:var(--first-color); display:inline-flex; align-items:center; gap:.25rem; font-size:var(--small-font-size); }
+.original-site .simple-page-copy { line-height: 1.8; }
+.original-site .simple-page-image { display:block; width:100%; max-height: 480px; object-fit:contain; border-radius:1rem; margin:1.5rem auto; }
+
+@media screen and (min-width: 576px) { .original-site .work__card img { width: 295px; } }
+.original-site .skills__check { color: var(--first-color); flex-shrink: 0; margin-top: .1rem; }
+.original-site .contact__card-icon, .original-site .about__icon { display: inline-block; }

@@ -1,0 +1,26 @@
+/* Archeon app design primitives, opt-in to avoid altering legacy apps. */
+.archeon-app-surface {
+  --archeon-app-font: Manrope, ui-sans-serif, system-ui, sans-serif;
+  --archeon-app-radius: 12px;
+  --archeon-app-ink: #252725;
+  --archeon-app-muted: #717770;
+  --archeon-app-bg: #f6f7f2;
+  --archeon-app-panel: #fcfcf9;
+  --archeon-app-border: #e4e6dd;
+  --archeon-app-primary: #28352e;
+  --archeon-app-primary-text: #fff;
+  font-family: var(--archeon-app-font);
+}
+.archeon-app-surface[data-tack-theme="dark"],
+.archeon-app-surface[data-archeon-app-theme="dark"] {
+  --archeon-app-ink: #e8e9e7;
+  --archeon-app-muted: #a1a49f;
+  --archeon-app-bg: #0d0e0e;
+  --archeon-app-panel: #171919;
+  --archeon-app-border: #323635;
+  --archeon-app-primary: #e2e7e1;
+  --archeon-app-primary-text: #191d1b;
+  color-scheme: dark;
+}
+.archeon-app-surface[data-tack-theme="light"],
+.archeon-app-surface[data-archeon-app-theme="light"] { color-scheme: light; }
