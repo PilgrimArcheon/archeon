@@ -27,14 +27,23 @@ export async function PUT(req: NextRequest) {
     const validated = parseTackDocument(body.data);
     if (!validated) return json({ error: "Invalid TackBoard data." }, 400);
     const sql = database();
-    // A single atomic CAS protects against silent overwrites by another browser or extension.
-    // First writer creates revision 1; later writers must provide the exact current revision.
-    const result = await sql`INSERT INTO tack_sync_documents(user_id, content, revision)
-      SELECT ${user.userId}, ${JSON.stringify(validated)}::jsonb, 1 WHERE ${baseRevision as number}=0
-      ON CONFLICT(user_id) DO UPDATE SET
-        content=EXCLUDED.content, revision=tack_sync_documents.revision+1, updated_at=NOW()
-      WHERE tack_sync_documents.revision=${baseRevision as number}
-      RETURNING revision`;
+    // Revision 0 creates the document; positive revisions update the existing row.
+    // IMPORTANT: an INSERT ... SELECT with `WHERE baseRevision=0` cannot reach
+    // ON CONFLICT for later saves, since SELECT produces NO row when baseRevision>0.
+    // Each branch is a single atomic compare-and-swap statement.
+    const encoded = JSON.stringify(validated);
+    const expected = baseRevision as number;
+    const result = expected === 0
+      ? await sql`INSERT INTO tack_sync_documents (user_id, content, revision)
+          VALUES (${user.userId}, ${encoded}::jsonb, 1)
+          ON CONFLICT (user_id) DO NOTHING
+          RETURNING revision`
+      : await sql`UPDATE tack_sync_documents
+          SET content=${encoded}::jsonb,
+              revision=revision+1,
+              updated_at=NOW()
+          WHERE user_id=${user.userId} AND revision=${expected}
+          RETURNING revision`;
     if (!result.length) {
       const latest = await sql`SELECT revision,content FROM tack_sync_documents WHERE user_id=${user.userId}`;
       return json({ error: "Cloud board changed on another device.", revision: Number(latest[0]?.revision ?? 0), data: latest[0]?.content ?? null, accountId: user.userId }, 409);
