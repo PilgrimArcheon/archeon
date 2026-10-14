@@ -5,7 +5,7 @@
 .loading{display:grid;place-items:center;min-height:100vh;background:#f6f7f2;color:#66796c;font-family:Manrope,ui-sans-serif,sans-serif}.loading span{font-weight:800}
 @keyframes peelAway{0%{opacity:1;transform:rotate(0)}20%{transform:rotate(-6deg) scale(1.035)}55%{opacity:1;transform:translateY(-38px) rotate(-14deg) scale(.97)}100%{opacity:0;transform:translate(40px,-200px) rotate(31deg) scale(.69)}}
 @media(max-width:1200px){.sidebar{width:225px}.summaryRow{gap:18px}.summaryUnit{min-width:90px}.topBack{display:none}.headingRow h1{font-size:42px}}
-@media(max-width:1050px){.boardCanvas{min-height:620px}.sticky{position:relative;left:auto!important;top:auto!important;margin:0;flex:none}.boardCanvas{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:23px;align-content:start;padding:28px}.sticky{width:auto;min-height:242px}.addOnCanvas{position:relative;right:auto;bottom:auto;min-height:220px;width:auto;height:auto}.archiveCanvas{min-height:400px}.summaryProgress{display:none}.canvasMeta>span:last-child{display:none}}
+@media(max-width:1050px){.boardCanvas{min-height:620px}.sticky{position:relative;margin:0;flex:none}.boardCanvas{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:23px;align-content:start;padding:28px}.sticky{width:auto;min-height:242px}.addOnCanvas{position:relative;right:auto;bottom:auto;min-height:220px;width:auto;height:auto}.archiveCanvas{min-height:400px}.summaryProgress{display:none}.canvasMeta>span:last-child{display:none}}
 @media(max-width:760px){.sidebar{position:fixed;top:0;bottom:0;left:0;height:100dvh;min-height:0;width:min(285px,88vw);transform:translateX(-110%);transition:transform .25s ease;box-shadow:15px 0 70px #0002;z-index:75}.sidebarOpen{transform:translateX(0)}.navScrim{display:block;position:fixed;inset:0;background:#0a170d88!important;z-index:70}.mobileClose{display:grid!important;place-items:center;margin-left:auto;color:#6c746b!important}.topbar{height:65px;padding:0 20px}.menuButton{display:grid!important;place-items:center;margin-right:4px;color:#4b5e4d!important}.privateLabel{font-size:0}.privateLabel .greenDot{height:8px;width:8px}.topActions{gap:13px}.workspace{padding:34px 18px 12px}.headingRow{align-items:flex-start;flex-direction:column}.headingRow h1{font-size:39px}.headingActions{justify-content:flex-start;width:100%}.summaryRow{margin-top:27px;gap:8px;justify-content:space-between;padding:20px 0}.summaryUnit{min-width:0}.summaryUnit strong{font-size:23px}.summaryUnit span{font-size:8px;max-width:95px}.toolsRow{padding:26px 0 18px;align-items:stretch;flex-direction:column-reverse}.searchBox{width:100%}.boardCanvas{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));padding:25px 19px;gap:24px}.canvasMeta{padding:16px}.pageFoot{flex-direction:column;align-items:flex-start}.modal{padding:20px}.twoFields{grid-template-columns:1fr;gap:0}}
 @media(max-width:390px){.boardCanvas{grid-template-columns:1fr;padding:19px}.summaryUnit span{font-size:7px}.breadcrumb span:first-of-type{display:none}.headingRow h1{font-size:34px}}
 @media(prefers-reduced-motion:reduce){.app *{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}.peeling{opacity:0!important}}
@@ -109,4 +109,15 @@
   .peeling,.peeling:nth-of-type(n),.peeling:hover,
   .peeling::after,.peeling .peelBadge{animation:none!important}
   .peeling{opacity:0!important}
+}
+
+/* Mobile spatial pinboard: keep x/y coordinates editable on touch devices.
+   Horizontal swiping works on the empty board; touching a grip drags the note. */
+.dragHandle{touch-action:none!important;-webkit-user-select:none;user-select:none;overscroll-behavior:none}
+@media(max-width:1050px){
+  .canvasSection{overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+  .boardCanvas{position:relative;display:block;grid-template-columns:none;gap:0;padding:0;width:max-content;max-width:none}
+  .sticky{position:absolute;left:initial;top:initial;width:246px;min-height:265px;max-width:246px;margin:0}
+  .addOnCanvas{position:absolute;right:22px;bottom:22px;width:116px;height:118px;min-height:118px}
+  .archiveCanvas{min-height:460px}
 }

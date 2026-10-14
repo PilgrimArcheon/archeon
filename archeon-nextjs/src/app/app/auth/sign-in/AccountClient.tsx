@@ -23,12 +23,19 @@ export default function AccountClient() {
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault(); setError(""); setBusy(true);
     try {
-      const response = await fetch(`/api/auth/password/${mode === "register" ? "register" : "login"}`, {
+      // These are the current account endpoints. The removed /password/* routes
+      // returned HTML 404 pages and caused "Unexpected token '<'" when parsed as JSON.
+      const response = await fetch(`/api/auth/${mode === "register" ? "register" : "login"}`, {
         method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim(), password }),
       });
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.error || "Something went wrong. Try again.");
+      const contentType = response.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        throw new Error("The account service returned a webpage instead of an API response. Please refresh and try again; if it persists, contact Archeon support.");
+      }
+      const body: { error?: string; signedIn?: boolean } = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error || `Account request failed (HTTP ${response.status}).`);
+      if (!body.signedIn) throw new Error("The account service did not confirm the sign-in. Please try again.");
       window.location.assign(next);
     } catch (e) { setError(e instanceof Error ? e.message : "Unable to continue."); setBusy(false); }
   }
@@ -46,13 +53,13 @@ export default function AccountClient() {
         </div>
         <form onSubmit={submit}>
           <label className={styles.label}>Email address<input type="email" required autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com" maxLength={254}/></label>
-          <label className={styles.label}>Password<div className={styles.password}><input type={show ? "text" : "password"} minLength={8} maxLength={128} required autoComplete={mode === "register" ? "new-password" : "current-password"} value={password} onChange={e=>setPassword(e.target.value)} placeholder={mode === "register" ? "At least 8 characters" : "Enter your password"}/><button type="button" aria-label={show ? "Hide password" : "Show password"} onClick={()=>setShow(v=>!v)}>{show?<EyeOff size={18}/>:<Eye size={18}/>}</button></div></label>
+          <label className={styles.label}>Password<div className={styles.password}><input type={show ? "text" : "password"} minLength={mode === "register" ? 12 : 1} maxLength={128} required autoComplete={mode === "register" ? "new-password" : "current-password"} value={password} onChange={e=>setPassword(e.target.value)} placeholder={mode === "register" ? "At least 12 characters" : "Enter your password"}/><button type="button" aria-label={show ? "Hide password" : "Show password"} onClick={()=>setShow(v=>!v)}>{show?<EyeOff size={18}/>:<Eye size={18}/>}</button></div></label>
           {error && <div className={styles.error} role="alert">{error}</div>}
           <button className={styles.submit} type="submit" disabled={busy}>{busy ? "Please wait…" : mode === "register" ? "Create account" : "Sign in"}<ArrowRight size={16}/></button>
         </form>
         <div className={styles.foot}><LockKeyhole size={15}/> Your password is securely hashed before storage. No email verification or recovery yet.</div>
       </div>
-      <p className={styles.note}>TackBoard notes currently live in browser storage. Cloud sync and team invitations are coming separately.</p>
+      <p className={styles.note}>One Archeon account keeps your TackBoard workspace in sync across the web and paired desktop companions.</p>
     </div>
   </main>;
 }
