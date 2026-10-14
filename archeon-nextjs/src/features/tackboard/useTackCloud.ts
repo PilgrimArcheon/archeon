@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { initialData, readStore, STORE_KEY, type TackboardData } from "./model";
+import { mergeTackDocuments } from "./merge";
 
 export type SyncStatus = "loading" | "guest" | "synced" | "saving" | "offline" | "conflict";
 type Conflict = { data: TackboardData | null; revision: number };
@@ -9,6 +10,8 @@ const SYNC_PATH = "/api/apps/tackboard/sync";
 const accountKey = (id: string) => `archeon:tackboard:account:${id}`;
 const revisionKey = (id: string) => `archeon:tackboard:revision:${id}`;
 const pendingKey = (id: string) => `archeon:tackboard:pending:${id}`;
+const baselineKey = (id: string) => `archeon:tackboard:baseline:${id}`;
+const same = (a: TackboardData, b: TackboardData) => JSON.stringify(a) === JSON.stringify(b);
 
 /** Explicit, optimistic syncing. Never silently overwrite edits from another device. */
 export function useTackCloud() {
@@ -24,6 +27,7 @@ export function useTackCloud() {
   const content = useRef<TackboardData | null>(null);
   const account = useRef<string | null>(null);
   const revision = useRef(0);
+  const baseline = useRef<TackboardData | null>(null);
   const sequence = useRef(0);
   const committed = useRef(0);
   const inflight = useRef(false);
@@ -31,8 +35,17 @@ export function useTackCloud() {
   const conflicted = useRef(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const saveRef = useRef<() => Promise<void>>(async () => {});
+  const checkRef = useRef<() => void>(() => {});
 
   const load = (value: TackboardData) => { content.current = value; setData(value); };
+  const recordCloud = (id: string, remote: TackboardData, rev: number) => {
+    baseline.current = remote;
+    revision.current = rev;
+    try {
+      localStorage.setItem(baselineKey(id), JSON.stringify(remote));
+      localStorage.setItem(revisionKey(id), String(rev));
+    } catch { /* allow a temporary storage failure without discarding edits */ }
+  };
   const setTheme = useCallback((value: "light" | "dark") => {
     setThemeState(value);
     try { localStorage.setItem("archeon-app-theme", value); } catch { /* private mode */ }
@@ -67,44 +80,72 @@ export function useTackCloud() {
   }, [persist, schedule]);
 
   const save = useCallback(async () => {
-    const userId = account.current;
-    if (!userId || !content.current || conflicted.current || inflight.current || sequence.current === committed.current) return;
+    const id = account.current;
+    if (!id || !content.current || conflicted.current || inflight.current || sequence.current === committed.current) return;
     inflight.current = true;
     const sending = sequence.current;
+    const outgoing = content.current;
+    let shouldRetry = false;
     try {
       const response = await fetch(SYNC_PATH, {
         method: "PUT", credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ baseRevision: revision.current, data: content.current }),
+        body: JSON.stringify({ baseRevision: revision.current, data: outgoing }),
       });
       const result = await response.json();
       if (response.status === 409) {
-        conflicted.current = true;
-        setConflict({ data: result.data ? readStore(JSON.stringify(result.data)) : null, revision: result.revision });
-        setStatus("conflict");
+        const remote = result.data ? readStore(JSON.stringify(result.data)) : null;
+        const remoteRevision = Number(result.revision);
+        if (!remote || !Number.isSafeInteger(remoteRevision)) throw new Error("Could not read latest cloud document");
+        if (content.current && same(remote, content.current)) {
+          // A previous upload may have completed even if the response was lost.
+          recordCloud(id, remote, remoteRevision);
+          committed.current = sequence.current;
+          localStorage.removeItem(pendingKey(id));
+          setStatus("synced");
+        } else {
+          const resultMerge = baseline.current && content.current
+            ? mergeTackDocuments(baseline.current, content.current, remote) : null;
+          if (!resultMerge || resultMerge.conflicts.length) {
+            conflicted.current = true;
+            setConflict({ data: remote, revision: remoteRevision });
+            setStatus("conflict");
+          } else {
+            // The remote is now the CAS baseline. Never overwrite independent edits.
+            recordCloud(id, remote, remoteRevision);
+            load(resultMerge.data);
+            if (same(resultMerge.data, remote)) {
+              committed.current = sequence.current;
+              localStorage.removeItem(pendingKey(id));
+              setStatus("synced");
+            } else {
+              sequence.current++;
+              persist();
+              setStatus("saving");
+              shouldRetry = true;
+            }
+          }
+        }
         return;
       }
       if (!response.ok) throw new Error(result.error || "Sync unavailable");
-      revision.current = result.revision;
+      recordCloud(id, outgoing, Number(result.revision));
       committed.current = sending;
       retries.current = 0;
-      localStorage.setItem(revisionKey(userId), String(revision.current));
       if (sending === sequence.current) {
-        localStorage.removeItem(pendingKey(userId));
+        localStorage.removeItem(pendingKey(id));
         setStatus("synced");
-      } else { setStatus("saving"); }
+      } else setStatus("saving");
     } catch {
-      // Do not raise a toast for every background attempt. The sidebar reflects outages.
       retries.current = Math.min(retries.current + 1, 6);
       setStatus("offline");
     } finally {
       inflight.current = false;
       if (!conflicted.current && sequence.current !== committed.current && navigator.onLine) {
-        // Push newer local edits first. Back off on repeated network failures.
-        schedule(retries.current ? Math.min(30000, 1500 * (2 ** retries.current)) : 650);
+        schedule(shouldRetry ? 150 : retries.current ? Math.min(30000, 1500 * (2 ** retries.current)) : 650);
       }
     }
-  }, [schedule]);
+  }, [persist, schedule]);
   saveRef.current = save;
 
   useEffect(() => {
@@ -130,40 +171,67 @@ export function useTackCloud() {
         const id = String(session.userId);
         const cached = readStore(localStorage.getItem(accountKey(id)));
         const previousRevision = Number(localStorage.getItem(revisionKey(id)) || 0);
+        const previousBaseline = readStore(localStorage.getItem(baselineKey(id)));
         const dirty = localStorage.getItem(pendingKey(id)) === "1";
         account.current = id; setAccountId(id); setAccountEmail(session.email);
+        baseline.current = previousBaseline;
         try {
           const result = await fetch(SYNC_PATH, { cache: "no-store" });
           if (!result.ok) throw new Error("Failed to load cloud boards");
           const remote = await result.json();
           if (!active) return;
           const serverData = remote.data ? readStore(JSON.stringify(remote.data)) : null;
-          revision.current = Number(remote.revision || 0);
+          const cloudRevision = Number(remote.revision || 0);
           if (dirty && cached) {
-            load(cached);
-            if (previousRevision !== revision.current) {
-              conflicted.current = true;
-              setConflict({ data: serverData, revision: revision.current });
-              setStatus("conflict");
-            } else {
+            if (previousRevision === cloudRevision || !serverData) {
+              load(cached);
+              revision.current = cloudRevision;
+              if (serverData) recordCloud(id, serverData, cloudRevision);
               sequence.current = 1;
               setStatus("saving"); schedule(500);
+            } else if (previousBaseline) {
+              const merged = mergeTackDocuments(previousBaseline, cached, serverData);
+              if (merged.conflicts.length) {
+                load(cached);
+                revision.current = cloudRevision;
+                conflicted.current = true;
+                setConflict({ data: serverData, revision: cloudRevision });
+                setStatus("conflict");
+              } else {
+                load(merged.data);
+                recordCloud(id, serverData, cloudRevision);
+                if (same(merged.data, serverData)) {
+                  localStorage.setItem(accountKey(id), JSON.stringify(merged.data));
+                  localStorage.removeItem(pendingKey(id));
+                  setStatus("synced");
+                } else {
+                  sequence.current = 1;
+                  persist(); setStatus("saving"); schedule(500);
+                }
+              }
+            } else {
+              load(cached);
+              revision.current = cloudRevision;
+              conflicted.current = true;
+              setConflict({ data: serverData, revision: cloudRevision });
+              setStatus("conflict");
             }
           } else {
-            load(serverData ?? initialData());
-            localStorage.setItem(accountKey(id), JSON.stringify(content.current));
-            localStorage.setItem(revisionKey(id), String(revision.current));
+            const loaded = serverData ?? initialData();
+            load(loaded);
+            recordCloud(id, loaded, cloudRevision);
+            localStorage.setItem(accountKey(id), JSON.stringify(loaded));
             if (!serverData) {
               sequence.current = 1;
-              setStatus("saving");
-              schedule(500);
+              localStorage.setItem(pendingKey(id), "1");
+              setStatus("saving"); schedule(500);
             } else setStatus("synced");
           }
         } catch {
           load(cached ?? initialData());
           revision.current = Number.isSafeInteger(previousRevision) ? previousRevision : 0;
           setStatus("offline");
-          // Recheck even on first sign-in if the server was unreachable.
+          // Keep unsynced data untouched; wait for reconnection before retrying.
           sequence.current = 1;
         }
       } catch {
@@ -176,23 +244,29 @@ export function useTackCloud() {
 
   useEffect(() => {
     const check = () => {
-      if (!account.current || conflicted.current || !content.current || inflight.current) return;
+      const id = account.current;
+      if (!id || conflicted.current || !content.current || inflight.current) return;
       if (sequence.current !== committed.current) { void saveRef.current(); return; }
+      const atSequence = sequence.current;
       void fetch(SYNC_PATH, { cache: "no-store" }).then(async response => {
-        if (!response.ok || conflicted.current || inflight.current || sequence.current !== committed.current) return;
+        if (!response.ok) return;
         const cloud = await response.json();
+        // Critical: a GET started before an edit may finish after the edit. Never replace that edit.
+        if (id !== account.current || conflicted.current || inflight.current ||
+            sequence.current !== atSequence || sequence.current !== committed.current) return;
         if (Number(cloud.revision) > revision.current) {
-          const next = readStore(JSON.stringify(cloud.data));
+          const next = cloud.data ? readStore(JSON.stringify(cloud.data)) : null;
           if (!next) return;
-          revision.current = cloud.revision;
+          recordCloud(id, next, Number(cloud.revision));
           load(next);
-          localStorage.setItem(accountKey(account.current!), JSON.stringify(next));
-          localStorage.setItem(revisionKey(account.current!), String(revision.current));
+          localStorage.setItem(accountKey(id), JSON.stringify(next));
+          localStorage.removeItem(pendingKey(id));
           setStatus("synced");
         }
       }).catch(() => {});
     };
-    const interval = setInterval(() => { if (document.visibilityState === "visible" && navigator.onLine) check(); }, 20000);
+    checkRef.current = check;
+    const interval = setInterval(() => { if (document.visibilityState === "visible" && navigator.onLine) check(); }, 12000);
     window.addEventListener("online", check);
     window.addEventListener("focus", check);
     return () => { clearInterval(interval); window.removeEventListener("online", check); window.removeEventListener("focus", check); };
@@ -210,8 +284,8 @@ export function useTackCloud() {
 
   const chooseConflict = useCallback((choice: "cloud" | "device") => {
     if (!conflict || !account.current) return;
-    revision.current = conflict.revision;
-    localStorage.setItem(revisionKey(account.current), String(revision.current));
+    if (conflict.data) recordCloud(account.current, conflict.data, conflict.revision);
+    else { revision.current = conflict.revision; localStorage.setItem(revisionKey(account.current), String(revision.current)); }
     conflicted.current = false;
     setConflict(null);
     if (choice === "cloud") {
@@ -254,6 +328,7 @@ export function useTackCloud() {
         localStorage.removeItem(accountKey(previousId));
         localStorage.removeItem(revisionKey(previousId));
         localStorage.removeItem(pendingKey(previousId));
+        localStorage.removeItem(baselineKey(previousId));
         Object.keys(localStorage).filter(key => key.startsWith("archeon:tackboard:recovery:")).forEach(key => localStorage.removeItem(key));
       }
       account.current = null;
@@ -265,5 +340,5 @@ export function useTackCloud() {
 
   return { data, ready, accountEmail, accountId, status, message, setMessage, conflict, chooseConflict,
     hasGuestNotes, importGuest, edit, replaceData: (next: TackboardData) => edit(() => next),
-    syncNow: () => void saveRef.current(), signOut, theme, setTheme };
+    syncNow: () => { if (sequence.current !== committed.current) void saveRef.current(); else checkRef.current(); }, signOut, theme, setTheme };
 }

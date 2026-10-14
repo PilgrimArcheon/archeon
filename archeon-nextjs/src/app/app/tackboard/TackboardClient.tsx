@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import {
-  ArrowDownToLine, ArrowLeft, Archive, ArrowUpRight, Check, CheckCheck, CircleHelp, Cloud, CloudOff, Monitor, Moon, Sun, Link2, Copy, RefreshCw,
-  ClipboardList, Grip, Layers3, Menu, MoreHorizontal, Pencil, Pin, Plus, RotateCcw,
+  ArrowDownToLine, ArrowLeft, Archive, ArrowUpRight, Check, CheckCheck, ChevronDown, CircleHelp, Cloud, CloudOff, Monitor, Moon, Sun, Link2, Copy, RefreshCw,
+  ClipboardList, Grip, Menu, MoreHorizontal, Pencil, Pin, Plus, RotateCcw,
   Search, Share2, Trash2, X,
 } from "lucide-react";
 import {
@@ -63,6 +64,7 @@ export default function TackboardClient() {
     } catch { setNotice("Unable to disconnect device."); }
   }
   const [selectedBoard, setSelectedBoard] = useState("");
+  useEffect(() => { try { setSelectedBoard(localStorage.getItem("archeon:tackboard:selected-board") || ""); } catch { /* optional preference */ } }, []);
   const [showArchive, setShowArchive] = useState(false);
   const [filter, setFilter] = useState<Filter>("all");
   const [search, setSearch] = useState("");
@@ -108,7 +110,9 @@ export default function TackboardClient() {
   const canvasWidth = Math.max(850, ...boardNotes.map(note => note.x + 280));
 
   const chooseBoard = (id: string) => {
-    setSelectedBoard(id); mutate(d => ({ ...d, activeBoardId: id }));
+    setSelectedBoard(id);
+    // Selection is a per-device preference, not a cloud document edit.
+    try { localStorage.setItem("archeon:tackboard:selected-board", id); } catch { /* optional preference */ }
     setShowArchive(false); setFilter("all"); setSearch(""); setMobileNav(false);
   };
   const startNote = () => {
@@ -278,7 +282,8 @@ export default function TackboardClient() {
   if (!ready || !data) return <div className={styles.loading}>Loading your board<span>…</span></div>;
   return <div className={`${styles.app} archeon-app-surface`} data-tack-theme={theme}>
     <aside className={`${styles.sidebar} ${mobileNav ? styles.sidebarOpen : ""}`} aria-label="Tackboard sidebar">
-      <div className={styles.brand}><div className={styles.brandMark}><Layers3 size={21}/></div><div><strong>tackboard<span>.</span></strong><small>Make room for doing.</small></div><button className={styles.mobileClose} onClick={() => setMobileNav(false)} aria-label="Close navigation"><X size={18}/></button></div>
+      <div className={styles.brand}><div className={styles.brandMark}><Image src="/images/tackboard-icon.png" alt="" width={35} height={35}/></div><div><strong>tackboard<span>.</span></strong><small>Make room for doing.</small></div><button className={styles.mobileClose} onClick={() => setMobileNav(false)} aria-label="Close navigation"><X size={18}/></button></div>
+      <Link className={styles.allAppsLink} href="/app"><ArrowLeft size={15}/> All apps</Link>
       <div className={styles.sidebarLabel}>WORKSPACE <span>{accountEmail ? "CLOUD / PERSONAL" : "LOCAL / PERSONAL"}</span></div>
       <div className={styles.boardHeading}><strong>Your boards</strong><button title="Create board" aria-label="Create board" onClick={() => { setBoardName(""); setDialog("board"); }}><Plus size={17}/></button></div>
       <nav className={styles.boardList} aria-label="Boards">{data.boards.map(b => <button key={b.id} aria-current={boardId === b.id ? "page" : undefined} className={`${styles.boardItem} ${boardId === b.id ? styles.boardSelected : ""}`} onClick={() => chooseBoard(b.id)}><span className={styles.boardDot}/><span>{b.name}</span><span className={styles.boardCount}>{data.notes.filter(n => n.boardId === b.id && !n.archivedAt).length}</span></button>)}</nav>
@@ -288,23 +293,36 @@ export default function TackboardClient() {
         <button onClick={() => setDialog("help")}><CircleHelp size={17}/> How it works</button>
       </div>
       <div className={styles.sidebarBottom}>
-        <div className={styles.offlineCard}><span className={styles.greenDot}/> <strong>{accountEmail ? "Cloud workspace" : "Saved on this device"}</strong><p>{accountEmail ? `Account: ${accountEmail}. ${syncStatus === "offline" ? "Offline: your changes are saved locally and will retry." : syncStatus === "conflict" ? "A change on another device needs your review." : "Notes are saved locally and backed up quietly to your cloud."}` : "No account needed. Sign in to sync across devices."}</p></div>
-        <Link href="/app/tackboard/desktop" className={styles.backLink}><Monitor size={14}/> Get desktop TackBoard ↗</Link>
-        {accountId && <div className={styles.cloudPanel}>
-          <button onClick={syncNow} disabled={syncStatus === "conflict"} className={styles.exportButton}><RefreshCw size={14}/> Sync now</button>
-          {hasGuestNotes && <button className={styles.importButton} onClick={importGuest}>Move guest notes to cloud</button>}
-          <button className={styles.importButton} onClick={exportRecovery}>Download recovery backup</button>
-          <button className={styles.importButton} onClick={() => { setShowDevices(v=>!v); if (!showDevices) void loadDevices(); }}><Link2 size={13}/> Desktop companion</button>
-          {showDevices && <div className={styles.devices}><strong>Connect TackBoard Desktop</strong><p>Generate a pairing key and paste it into TackBoard Desktop → Settings. Only your sticky notes can be accessed.</p><button className={styles.exportButton} disabled={pairBusy} onClick={pairDevice}>Generate pairing key</button>
-          {pairToken && <div className={styles.pairKey}><code>{pairToken}</code><button onClick={() => { navigator.clipboard.writeText(pairToken).then(()=>setNotice("Pairing key copied.")).catch(()=>setNotice("Select and copy the key.")); }} aria-label="Copy pairing key"><Copy size={15}/></button></div>}
-          <small>Shown once. Keep this key private; the desktop app stores it using your operating system’s secure storage when available. Expires after 90 days.</small>
-          {pairedDevices.map(d => <div key={d.id} className={styles.deviceRow}><span>{d.label}</span><button onClick={()=>revokeDevice(d.id)}>Revoke</button></div>)}</div>}
-        </div>}
-        <button className={styles.exportButton} onClick={exportBackup}><ArrowDownToLine size={16}/> Export backup</button>
-        <button className={styles.importButton} onClick={() => importRef.current?.click()}>Import backup</button>
+        <div className={styles.cloudSummary} role="status">
+          <span className={styles.greenDot}/>
+          <div><strong>{accountEmail ? "Personal cloud" : "Local workspace"}</strong><small>{syncStatus === "conflict" ? "A real edit conflict needs review" : syncStatus === "offline" ? "Offline · changes kept on device" : syncStatus === "saving" ? "Saving changes…" : accountEmail ? "Changes save quietly" : "Saved on this device"}</small></div>
+        </div>
+        <details className={styles.sideDisclosure}>
+          <summary><span><Cloud size={16}/> Cloud & desktop</span><ChevronDown size={15}/></summary>
+          <div className={styles.sideDisclosureBody}>
+            <Link href="/app/tackboard/desktop" className={styles.sideItem}><Monitor size={15}/> Get desktop TackBoard <ArrowUpRight size={13}/></Link>
+            {accountId && <>
+              <button className={styles.sideItem} onClick={syncNow}><RefreshCw size={14}/> Sync now</button>
+              {hasGuestNotes && <button className={styles.sideItem} onClick={importGuest}>Move guest notes to cloud</button>}
+              <button className={styles.sideItem} onClick={() => { setShowDevices(v=>!v); if (!showDevices) void loadDevices(); }}><Link2 size={14}/> Desktop companion</button>
+              {showDevices && <div className={styles.devices}><strong>Connect TackBoard Desktop</strong><p>Generate a pairing key and paste it into the desktop Settings.</p><button className={styles.exportButton} disabled={pairBusy} onClick={pairDevice}>Generate pairing key</button>
+                {pairToken && <div className={styles.pairKey}><code>{pairToken}</code><button onClick={() => { navigator.clipboard.writeText(pairToken).then(()=>setNotice("Pairing key copied.")).catch(()=>setNotice("Select and copy the key.")); }} aria-label="Copy pairing key"><Copy size={15}/></button></div>}
+                <small>Shown once; keep this key private. Expires after 90 days.</small>
+                {pairedDevices.map(d => <div key={d.id} className={styles.deviceRow}><span>{d.label}</span><button onClick={()=>revokeDevice(d.id)}>Revoke</button></div>)}
+              </div>}
+            </>}
+          </div>
+        </details>
+        <details className={styles.sideDisclosure}>
+          <summary><span><ArrowDownToLine size={16}/> Backup & account</span><ChevronDown size={15}/></summary>
+          <div className={styles.sideDisclosureBody}>
+            <button className={styles.sideItem} onClick={exportBackup}><ArrowDownToLine size={15}/> Export backup</button>
+            <button className={styles.sideItem} onClick={() => importRef.current?.click()}>Import backup</button>
+            {accountId && <button className={styles.sideItem} onClick={exportRecovery}>Download recovery backup</button>}
+            {accountEmail ? <button className={styles.sideItem} onClick={signOut}>Sign out of Archeon</button> : <Link href="/app/auth/sign-in?next=%2Fapp%2Ftackboard" className={styles.sideItem}>Create account / Sign in</Link>}
+          </div>
+        </details>
         <input hidden ref={importRef} type="file" accept="application/json,.json" onChange={async e => { await importBackup(e.target.files?.[0]); e.target.value = ""; }}/>
-        {accountEmail ? <button className={styles.importButton} onClick={signOut}>Sign out of Archeon</button> : <Link href="/app/auth/sign-in?next=%2Fapp%2Ftackboard" className={styles.backLink}>Create account / Sign in</Link>}
-        <Link href="/products/tackboard" className={styles.backLink}><ArrowLeft size={15}/> Product showcase</Link>
       </div>
     </aside>
     {mobileNav && <button className={styles.navScrim} aria-label="Close menu" onClick={() => setMobileNav(false)}/>}

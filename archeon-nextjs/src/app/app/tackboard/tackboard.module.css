@@ -121,3 +121,31 @@
   .addOnCanvas{position:absolute;right:22px;bottom:22px;width:116px;height:118px;min-height:118px}
   .archiveCanvas{min-height:460px}
 }
+
+/* v0.5: quieter sidebar matching the Invoice Studio All apps hierarchy. */
+.brand{padding-bottom:24px;flex-shrink:0}
+.brandMark{background:transparent!important;color:inherit!important;overflow:visible}
+.brandMark img{width:35px;height:35px;object-fit:contain}
+.allAppsLink{display:flex;align-items:center;gap:11px;margin:0 5px 32px;padding:12px 13px;border:1px solid var(--archeon-app-border,#393e3a);border-radius:9px;font-size:12px;font-weight:650;color:var(--archeon-app-ink,#e7e9e5)!important;transition:background .2s}
+.allAppsLink:hover{background:var(--archeon-app-panel,#252928)}
+.sidebar{min-height:0;padding:24px 17px 17px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#5559 transparent;gap:0}
+.sidebarLabel{margin-bottom:12px}
+.boardList{max-height:min(38vh,320px)}
+.sidebarRule{margin:22px 5px 16px}
+.sidebarBottom{margin-top:auto;padding:26px 3px 2px;display:grid;gap:10px}
+.cloudSummary{display:flex;align-items:flex-start;gap:11px;padding:13px 12px;background:var(--archeon-app-panel,#f5f6f3);border:1px solid var(--archeon-app-border,#dedfda);border-radius:10px}
+.cloudSummary .greenDot{flex:0 0 7px;margin-top:6px}
+.cloudSummary>div{min-width:0;display:grid;gap:3px}
+.cloudSummary strong{font-size:11px;font-weight:800;color:var(--archeon-app-ink,#232b27)}
+.cloudSummary small{font-size:10px;color:var(--archeon-app-muted,#727971);line-height:1.5;overflow-wrap:anywhere}
+.sideDisclosure{border:1px solid var(--archeon-app-border,#dee1da);border-radius:9px;overflow:hidden}
+.sideDisclosure summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 13px;cursor:pointer;color:var(--archeon-app-ink,#373d38);font-size:11px;font-weight:750}
+.sideDisclosure summary::-webkit-details-marker{display:none}
+.sideDisclosure summary span{display:flex;align-items:center;gap:10px}
+.sideDisclosure[open] summary>svg{transform:rotate(180deg)}
+.sideDisclosureBody{padding:3px 8px 9px;border-top:1px solid var(--archeon-app-border,#dee1da)}
+.sideItem{display:flex;align-items:center;gap:9px;padding:10px 8px;width:100%;text-align:left;font-size:11px!important;font-weight:550;color:var(--archeon-app-muted,#737a73)!important;border-radius:6px}
+.sideItem:hover{background:var(--archeon-app-bg,#e9ede7)!important;color:var(--archeon-app-ink,#2e3530)!important}
+.sideItem svg:last-child:not(:first-child){margin-left:auto}
+.sideDisclosure .devices{margin:7px 0 5px}
+@media(max-width:1050px){.sidebar{min-height:0;overflow-y:auto}.allAppsLink{margin-bottom:22px}}
