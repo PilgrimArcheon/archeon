@@ -9,7 +9,7 @@ const equal = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b
 
 function mergeItem<T extends { id: string }>(
   base: T | undefined, local: T | undefined, remote: T | undefined,
-  fields: readonly (keyof T)[], label: string, conflicts: string[],
+  fields: readonly (keyof T)[], label: string, conflicts: string[], preferLocalConflicts = false,
 ): T | undefined {
   if (equal(local, remote)) return local;
   if (equal(local, base)) return remote;
@@ -23,14 +23,17 @@ function mergeItem<T extends { id: string }>(
     const before = base[field], onDevice = local[field], onCloud = remote[field];
     if (equal(onDevice, onCloud) || equal(onDevice, before)) continue;
     if (equal(onCloud, before)) merged[field] = onDevice;
-    else conflicts.push(`${label}.${String(field)}`);
+    else {
+      conflicts.push(`${label}.${String(field)}`);
+      if (preferLocalConflicts) merged[field] = onDevice;
+    }
   }
   return merged;
 }
 
 function mergeCollection<T extends { id: string }>(
   base: readonly T[], local: readonly T[], remote: readonly T[],
-  fields: readonly (keyof T)[], label: string, conflicts: string[],
+  fields: readonly (keyof T)[], label: string, conflicts: string[], preferLocalConflicts = false,
 ): T[] {
   const old = new Map(base.map(item => [item.id, item]));
   const mine = new Map(local.map(item => [item.id, item]));
@@ -38,17 +41,21 @@ function mergeCollection<T extends { id: string }>(
   // Preserve cloud ordering, append device-only additions.
   const ids = [...new Set([...remote.map(item => item.id), ...local.map(item => item.id), ...base.map(item => item.id)])];
   return ids.flatMap(id => {
-    const item = mergeItem(old.get(id), mine.get(id), theirs.get(id), fields, `${label}:${id}`, conflicts);
+    const item = mergeItem(old.get(id), mine.get(id), theirs.get(id), fields, `${label}:${id}`, conflicts, preferLocalConflicts);
     return item ? [item] : [];
   });
 }
 
-export function mergeTackDocuments(base: TackboardData, local: TackboardData, remote: TackboardData): MergeResult {
+export function mergeTackDocuments(
+  base: TackboardData, local: TackboardData, remote: TackboardData,
+  options: { preferLocalConflicts?: boolean } = {},
+): MergeResult {
+  const preferLocal = options.preferLocalConflicts === true;
   const conflicts: string[] = [];
-  const boards = mergeCollection<Board>(base.boards, local.boards, remote.boards, ["name", "createdAt"], "board", conflicts);
+  const boards = mergeCollection<Board>(base.boards, local.boards, remote.boards, ["name", "createdAt"], "board", conflicts, preferLocal);
   const notes = mergeCollection<Note>(base.notes, local.notes, remote.notes,
     ["boardId", "title", "body", "color", "status", "x", "y", "layer", "archivedAt", "createdAt"],
-    "note", conflicts);
+    "note", conflicts, preferLocal);
   const oldNotes = new Map(base.notes.map(note => [note.id, note]));
   const localNotes = new Map(local.notes.map(note => [note.id, note]));
   const remoteNotes = new Map(remote.notes.map(note => [note.id, note]));
@@ -60,7 +67,7 @@ export function mergeTackDocuments(base: TackboardData, local: TackboardData, re
     if (previous && mine && theirs) {
       // Two checkboxes in different tasks are independent edits; merge them separately.
       note.tasks = mergeCollection<Task>(previous.tasks, mine.tasks, theirs.tasks,
-        ["text", "done"], `note:${note.id}.task`, conflicts);
+        ["text", "done"], `note:${note.id}.task`, conflicts, preferLocal);
     }
     // updatedAt records metadata only; independent edits should not conflict on a timestamp.
     note.updatedAt = Math.max(previous?.updatedAt ?? 0, mine?.updatedAt ?? 0, theirs?.updatedAt ?? 0);

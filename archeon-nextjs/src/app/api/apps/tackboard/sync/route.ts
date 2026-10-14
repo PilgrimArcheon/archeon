@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
     if (!user) return json({ error: "Sign in to sync TackBoard." }, 401);
     const sql = database();
     const result = await sql`SELECT content, revision FROM tack_sync_documents WHERE user_id=${user.userId}`;
-    return json({ data: result[0]?.content ?? null, revision: Number(result[0]?.revision ?? 0) });
+    return json({ data: result[0]?.content ?? null, revision: Number(result[0]?.revision ?? 0), accountId: user.userId });
   } catch (error) { return authProblem(error); }
 }
 export async function PUT(req: NextRequest) {
@@ -37,8 +37,8 @@ export async function PUT(req: NextRequest) {
       RETURNING revision`;
     if (!result.length) {
       const latest = await sql`SELECT revision,content FROM tack_sync_documents WHERE user_id=${user.userId}`;
-      return json({ error: "Cloud board changed on another device.", revision: Number(latest[0]?.revision ?? 0), data: latest[0]?.content ?? null }, 409);
+      return json({ error: "Cloud board changed on another device.", revision: Number(latest[0]?.revision ?? 0), data: latest[0]?.content ?? null, accountId: user.userId }, 409);
     }
-    return json({ revision: Number(result[0].revision), saved: true });
+    return json({ revision: Number(result[0].revision), saved: true, accountId: user.userId });
   } catch (error) { return authProblem(error); }
 }

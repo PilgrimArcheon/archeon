@@ -5,7 +5,7 @@ import { initialData, readStore, STORE_KEY, type TackboardData } from "./model";
 import { mergeTackDocuments } from "./merge";
 
 export type SyncStatus = "loading" | "guest" | "synced" | "saving" | "offline" | "conflict";
-type Conflict = { data: TackboardData | null; revision: number };
+type Conflict = { data: TackboardData | null; revision: number; reasons?: string[] };
 const SYNC_PATH = "/api/apps/tackboard/sync";
 const accountKey = (id: string) => `archeon:tackboard:account:${id}`;
 const revisionKey = (id: string) => `archeon:tackboard:revision:${id}`;
@@ -23,6 +23,8 @@ export function useTackCloud() {
   const [conflict, setConflict] = useState<Conflict | null>(null);
   const [message, setMessage] = useState("");
   const [hasGuestNotes, setHasGuestNotes] = useState(false);
+  const [cloudRevision, setCloudRevision] = useState(0);
+  const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
   const [theme, setThemeState] = useState<"light" | "dark">("dark");
   const content = useRef<TackboardData | null>(null);
   const account = useRef<string | null>(null);
@@ -34,13 +36,16 @@ export function useTackCloud() {
   const retries = useRef(0);
   const conflicted = useRef(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const saveRef = useRef<() => Promise<void>>(async () => {});
-  const checkRef = useRef<() => void>(() => {});
+  const saveRef = useRef<() => Promise<boolean>>(async () => false);
+  const checkRef = useRef<() => Promise<boolean>>(async () => false);
+  const savePromise = useRef<Promise<boolean> | null>(null);
+  const pullPromise = useRef<Promise<boolean> | null>(null);
 
   const load = (value: TackboardData) => { content.current = value; setData(value); };
   const recordCloud = (id: string, remote: TackboardData, rev: number) => {
     baseline.current = remote;
     revision.current = rev;
+    setCloudRevision(rev);
     try {
       localStorage.setItem(baselineKey(id), JSON.stringify(remote));
       localStorage.setItem(revisionKey(id), String(rev));
@@ -79,72 +84,96 @@ export function useTackCloud() {
     }
   }, [persist, schedule]);
 
-  const save = useCallback(async () => {
+  // One upload at a time. Manual Save and background saves share the same promise,
+  // so neither can acknowledge a revision that was never accepted by Neon.
+  const save = useCallback(async (): Promise<boolean> => {
     const id = account.current;
-    if (!id || !content.current || conflicted.current || inflight.current || sequence.current === committed.current) return;
-    inflight.current = true;
-    const sending = sequence.current;
-    const outgoing = content.current;
-    let shouldRetry = false;
-    try {
-      const response = await fetch(SYNC_PATH, {
-        method: "PUT", credentials: "same-origin",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ baseRevision: revision.current, data: outgoing }),
-      });
-      const result = await response.json();
-      if (response.status === 409) {
-        const remote = result.data ? readStore(JSON.stringify(result.data)) : null;
-        const remoteRevision = Number(result.revision);
-        if (!remote || !Number.isSafeInteger(remoteRevision)) throw new Error("Could not read latest cloud document");
-        if (content.current && same(remote, content.current)) {
-          // A previous upload may have completed even if the response was lost.
-          recordCloud(id, remote, remoteRevision);
-          committed.current = sequence.current;
-          localStorage.removeItem(pendingKey(id));
-          setStatus("synced");
-        } else {
-          const resultMerge = baseline.current && content.current
-            ? mergeTackDocuments(baseline.current, content.current, remote) : null;
-          if (!resultMerge || resultMerge.conflicts.length) {
-            conflicted.current = true;
-            setConflict({ data: remote, revision: remoteRevision });
-            setStatus("conflict");
-          } else {
-            // The remote is now the CAS baseline. Never overwrite independent edits.
+    if (!id || !content.current || conflicted.current) return false;
+    if (savePromise.current) return savePromise.current;
+    if (sequence.current === committed.current) return true;
+    const operation = (async (): Promise<boolean> => {
+      inflight.current = true;
+      const sending = sequence.current;
+      const outgoing = content.current!;
+      const baseRevision = revision.current;
+      let retrySoon = false;
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
+      try {
+        const response = await fetch(SYNC_PATH, {
+          method: "PUT", credentials: "same-origin", cache: "no-store", signal: controller.signal,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ baseRevision, data: outgoing }),
+        });
+        let result: { error?: string; revision?: number; data?: unknown; saved?: boolean; accountId?: string };
+        try { result = await response.json(); }
+        catch { throw new Error(`Cloud returned an invalid response (HTTP ${response.status}).`); }
+        if (response.status === 401) throw new Error("Your session expired. Sign in again before saving.");
+        if (result.accountId && result.accountId !== id) throw new Error("Cloud account does not match this browser session. Save stopped.");
+        if (response.status === 409) {
+          const remote = result.data ? readStore(JSON.stringify(result.data)) : null;
+          const remoteRevision = Number(result.revision);
+          if (!remote || !Number.isSafeInteger(remoteRevision) || remoteRevision <= baseRevision)
+            throw new Error("Could not read the latest cloud revision.");
+          // Merge the LATEST local document, not the older snapshot we sent.
+          // A user may have edited another field while the PUT was in flight.
+          const current = content.current;
+          if (!current) return false;
+          const merged = baseline.current ? mergeTackDocuments(baseline.current, current, remote) : null;
+          if (same(current, remote) || (merged && merged.conflicts.length === 0)) {
+            const next = same(current, remote) ? remote : merged!.data;
             recordCloud(id, remote, remoteRevision);
-            load(resultMerge.data);
-            if (same(resultMerge.data, remote)) {
+            load(next);
+            retries.current = 0;
+            if (same(next, remote)) {
               committed.current = sequence.current;
+              localStorage.setItem(accountKey(id), JSON.stringify(next));
               localStorage.removeItem(pendingKey(id));
               setStatus("synced");
+              setLastSavedAt(Date.now());
             } else {
               sequence.current++;
               persist();
               setStatus("saving");
-              shouldRetry = true;
+              retrySoon = true;
             }
+            return true;
           }
+          conflicted.current = true;
+          setConflict({ data: remote, revision: remoteRevision, reasons: merged?.conflicts ?? ["Unknown common baseline"] });
+          setMessage("Two devices changed the same information. Review the conflict before saving.");
+          setStatus("conflict");
+          return false;
         }
-        return;
+        if (!response.ok || result.saved !== true || !Number.isSafeInteger(result.revision) || Number(result.revision) <= baseRevision)
+          throw new Error(result.error || `Cloud save was not confirmed (HTTP ${response.status}).`);
+        // This acknowledges precisely the snapshot sent, not edits made since.
+        recordCloud(id, outgoing, Number(result.revision));
+        committed.current = sending;
+        retries.current = 0;
+        if (sending === sequence.current) {
+          localStorage.removeItem(pendingKey(id));
+          setStatus("synced");
+          setLastSavedAt(Date.now());
+          setMessage("");
+        } else setStatus("saving");
+        return true;
+      } catch (error) {
+        retries.current = Math.min(retries.current + 1, 6);
+        setStatus("offline");
+        setMessage(error instanceof Error ? error.message : "Cloud save failed. Your changes remain on this device.");
+        return false;
+      } finally {
+        clearTimeout(timeout);
+        inflight.current = false;
+        if (!conflicted.current && sequence.current !== committed.current && navigator.onLine) {
+          schedule(retrySoon ? 150 : retries.current ? Math.min(30000, 1500 * (2 ** retries.current)) : 650);
+        }
       }
-      if (!response.ok) throw new Error(result.error || "Sync unavailable");
-      recordCloud(id, outgoing, Number(result.revision));
-      committed.current = sending;
-      retries.current = 0;
-      if (sending === sequence.current) {
-        localStorage.removeItem(pendingKey(id));
-        setStatus("synced");
-      } else setStatus("saving");
-    } catch {
-      retries.current = Math.min(retries.current + 1, 6);
-      setStatus("offline");
-    } finally {
-      inflight.current = false;
-      if (!conflicted.current && sequence.current !== committed.current && navigator.onLine) {
-        schedule(shouldRetry ? 150 : retries.current ? Math.min(30000, 1500 * (2 ** retries.current)) : 650);
-      }
-    }
+    })();
+    savePromise.current = operation;
+    try { return await operation; }
+    finally { if (savePromise.current === operation) savePromise.current = null; }
   }, [persist, schedule]);
   saveRef.current = save;
 
@@ -182,6 +211,7 @@ export function useTackCloud() {
           if (!active) return;
           const serverData = remote.data ? readStore(JSON.stringify(remote.data)) : null;
           const cloudRevision = Number(remote.revision || 0);
+          if (remote.accountId && String(remote.accountId) !== id) throw new Error("Cloud account identity mismatch.");
           if (dirty && cached) {
             if (previousRevision === cloudRevision || !serverData) {
               load(cached);
@@ -195,7 +225,7 @@ export function useTackCloud() {
                 load(cached);
                 revision.current = cloudRevision;
                 conflicted.current = true;
-                setConflict({ data: serverData, revision: cloudRevision });
+                setConflict({ data: serverData, revision: cloudRevision, reasons: merged?.conflicts ?? ["Unknown common baseline"] });
                 setStatus("conflict");
               } else {
                 load(merged.data);
@@ -213,7 +243,7 @@ export function useTackCloud() {
               load(cached);
               revision.current = cloudRevision;
               conflicted.current = true;
-              setConflict({ data: serverData, revision: cloudRevision });
+              setConflict({ data: serverData, revision: cloudRevision, reasons: ["No common cloud baseline available"] });
               setStatus("conflict");
             }
           } else {
@@ -225,7 +255,7 @@ export function useTackCloud() {
               sequence.current = 1;
               localStorage.setItem(pendingKey(id), "1");
               setStatus("saving"); schedule(500);
-            } else setStatus("synced");
+            } else { setStatus("synced"); setLastSavedAt(Date.now()); }
           }
         } catch {
           load(cached ?? initialData());
@@ -243,33 +273,69 @@ export function useTackCloud() {
   }, [schedule]);
 
   useEffect(() => {
-    const check = () => {
+    const check = async (): Promise<boolean> => {
       const id = account.current;
-      if (!id || conflicted.current || !content.current || inflight.current) return;
-      if (sequence.current !== committed.current) { void saveRef.current(); return; }
+      if (!id || conflicted.current || !content.current) return false;
+      if (pullPromise.current) return pullPromise.current;
+      if (inflight.current || sequence.current !== committed.current) return false;
       const atSequence = sequence.current;
-      void fetch(SYNC_PATH, { cache: "no-store" }).then(async response => {
-        if (!response.ok) return;
-        const cloud = await response.json();
-        // Critical: a GET started before an edit may finish after the edit. Never replace that edit.
-        if (id !== account.current || conflicted.current || inflight.current ||
-            sequence.current !== atSequence || sequence.current !== committed.current) return;
-        if (Number(cloud.revision) > revision.current) {
-          const next = cloud.data ? readStore(JSON.stringify(cloud.data)) : null;
-          if (!next) return;
-          recordCloud(id, next, Number(cloud.revision));
-          load(next);
-          localStorage.setItem(accountKey(id), JSON.stringify(next));
-          localStorage.removeItem(pendingKey(id));
+      const operation = (async (): Promise<boolean> => {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 15000);
+        try {
+          const response = await fetch(SYNC_PATH, { credentials: "same-origin", cache: "no-store", signal: controller.signal });
+          if (!response.ok) throw new Error(`Cloud refresh failed (HTTP ${response.status}).`);
+          const cloud = await response.json();
+          if (cloud.accountId && String(cloud.accountId) !== id) throw new Error("Cloud account identity mismatch. Local edits are preserved.");
+          const remoteRevision = Number(cloud.revision);
+          if (!Number.isSafeInteger(remoteRevision)) throw new Error("Invalid cloud revision.");
+          if (remoteRevision < revision.current) throw new Error("Cloud history is older than this device. Your local notes were preserved; check your account/database connection.");
+          // The GET must not replace a local edit made after the request began.
+          if (id !== account.current || conflicted.current || inflight.current ||
+              sequence.current !== atSequence || sequence.current !== committed.current) return false;
+          if (remoteRevision === revision.current && cloud.data && content.current) {
+            const confirmed = readStore(JSON.stringify(cloud.data));
+            if (confirmed && !same(confirmed, content.current)) {
+              conflicted.current = true;
+              setConflict({ data: confirmed, revision: remoteRevision, reasons: ["Local cache differs from the cloud at the same revision"] });
+              setStatus("conflict");
+              setMessage("Your local copy differs from the server. Export a backup before choosing a version.");
+              return false;
+            }
+          }
+          if (remoteRevision > revision.current) {
+            const next = cloud.data ? readStore(JSON.stringify(cloud.data)) : null;
+            if (!next) throw new Error("Cloud returned invalid board data.");
+            recordCloud(id, next, remoteRevision);
+            load(next);
+            localStorage.setItem(accountKey(id), JSON.stringify(next));
+            localStorage.removeItem(pendingKey(id));
+          }
           setStatus("synced");
-        }
-      }).catch(() => {});
+          setLastSavedAt(Date.now());
+          setMessage("");
+          return true;
+        } catch (error) {
+          // Do not show a loud toast on a background poll; keep diagnostic text.
+          setStatus("offline");
+          setMessage(error instanceof Error ? error.message : "Cloud refresh failed.");
+          return false;
+        } finally { clearTimeout(timeout); }
+      })();
+      pullPromise.current = operation;
+      try { return await operation; }
+      finally { if (pullPromise.current === operation) pullPromise.current = null; }
     };
     checkRef.current = check;
-    const interval = setInterval(() => { if (document.visibilityState === "visible" && navigator.onLine) check(); }, 12000);
-    window.addEventListener("online", check);
-    window.addEventListener("focus", check);
-    return () => { clearInterval(interval); window.removeEventListener("online", check); window.removeEventListener("focus", check); };
+    const refresh = () => {
+      if (!account.current || conflicted.current) return;
+      if (sequence.current !== committed.current) void saveRef.current();
+      else void checkRef.current();
+    };
+    const interval = setInterval(() => { if (document.visibilityState === "visible" && navigator.onLine) refresh(); }, 12000);
+    window.addEventListener("online", refresh);
+    window.addEventListener("focus", refresh);
+    return () => { clearInterval(interval); window.removeEventListener("online", refresh); window.removeEventListener("focus", refresh); };
   }, []);
 
   useEffect(() => {
@@ -284,23 +350,38 @@ export function useTackCloud() {
 
   const chooseConflict = useCallback((choice: "cloud" | "device") => {
     if (!conflict || !account.current) return;
-    if (conflict.data) recordCloud(account.current, conflict.data, conflict.revision);
-    else { revision.current = conflict.revision; localStorage.setItem(revisionKey(account.current), String(revision.current)); }
+    const id = account.current;
+    const original = content.current;
+    const before = baseline.current;
+    // Exportable recovery backup is created regardless of which side wins.
+    if (original) try { localStorage.setItem(`archeon:tackboard:recovery:${Date.now()}`, JSON.stringify(original)); }
+    catch { setMessage("Backup storage is full. Export your notes before proceeding."); return; }
+    const chosen = choice === "cloud"
+      ? (conflict.data ?? initialData())
+      : before && original && conflict.data
+        // Preserve independent cloud changes; only fields BOTH sides edited
+        // intentionally prefer this device when the user clicks Keep device.
+        ? mergeTackDocuments(before, original, conflict.data, { preferLocalConflicts: true }).data
+        : original;
+    if (conflict.data) recordCloud(id, conflict.data, conflict.revision);
+    else { revision.current = conflict.revision; localStorage.setItem(revisionKey(id), String(revision.current)); }
     conflicted.current = false;
     setConflict(null);
-    if (choice === "cloud") {
-      // Always preserve the local draft before switching to another device's work.
-      if (content.current) localStorage.setItem(`archeon:tackboard:recovery:${Date.now()}`, JSON.stringify(content.current));
-      load(conflict.data ?? initialData());
+    if (!chosen) return;
+    load(chosen);
+    if (choice === "cloud" || (conflict.data && same(chosen, conflict.data))) {
       committed.current = sequence.current;
-      localStorage.removeItem(pendingKey(account.current));
-      localStorage.setItem(accountKey(account.current), JSON.stringify(content.current));
+      localStorage.removeItem(pendingKey(id));
+      localStorage.setItem(accountKey(id), JSON.stringify(chosen));
       setStatus("synced");
-      setMessage("Cloud version loaded. Previous local draft saved in a recovery backup.");
+      setLastSavedAt(Date.now());
+      setMessage("Cloud version loaded. The previous local draft is in your recovery backup.");
     } else {
       sequence.current++;
       persist();
-      setStatus("saving"); schedule(100);
+      setStatus("saving");
+      setMessage("Device edits selected; merging and uploading without discarding independent cloud changes.");
+      schedule(100);
     }
   }, [conflict, persist, schedule]);
 
@@ -338,7 +419,28 @@ export function useTackCloud() {
     } catch { setMessage("Could not sign out. Please try again."); }
   }, []);
 
+  const flushToCloud = useCallback(async (refresh: boolean): Promise<boolean> => {
+    if (!account.current) { setMessage("Sign in to save boards to the cloud."); return false; }
+    if (conflicted.current) { setMessage("Resolve the outstanding cloud conflict first."); return false; }
+    if (timer.current) clearTimeout(timer.current);
+    // A newer local edit can arrive during a PUT. Keep flushing until all edits
+    // have a matching server acknowledgement, with a bounded retry budget.
+    for (let attempt = 0; attempt < 6 && sequence.current !== committed.current; attempt++) {
+      if (!await saveRef.current()) return false;
+    }
+    if (sequence.current !== committed.current) {
+      setStatus("saving");
+      setMessage("More changes are queued. Please try Save again.");
+      schedule(250);
+      return false;
+    }
+    if (refresh) return checkRef.current();
+    setStatus("synced");
+    setLastSavedAt(Date.now());
+    return true;
+  }, [schedule]);
+
   return { data, ready, accountEmail, accountId, status, message, setMessage, conflict, chooseConflict,
     hasGuestNotes, importGuest, edit, replaceData: (next: TackboardData) => edit(() => next),
-    syncNow: () => { if (sequence.current !== committed.current) void saveRef.current(); else checkRef.current(); }, signOut, theme, setTheme };
+    syncNow: () => flushToCloud(true), saveNow: () => flushToCloud(false), cloudRevision, lastSavedAt, signOut, theme, setTheme };
 }

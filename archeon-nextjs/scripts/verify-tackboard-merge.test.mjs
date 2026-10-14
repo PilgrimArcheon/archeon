@@ -13,3 +13,12 @@ test('board selection difference does not conflict',()=>{const base=make(),local
 test('independent checkboxes merge without conflict',()=>{const base=make(),local=structuredClone(base),remote=structuredClone(base);base.notes[0].tasks.push({id:'t2',text:'Second',done:false});local.notes[0].tasks=structuredClone(base.notes[0].tasks);remote.notes[0].tasks=structuredClone(base.notes[0].tasks);local.notes[0].tasks[0].done=true;remote.notes[0].tasks[1].done=true;const merged=mergeTackDocuments(base,local,remote);assert.deepEqual(merged.conflicts,[]);assert.equal(merged.data.notes[0].tasks[0].done,true);assert.equal(merged.data.notes[0].tasks[1].done,true);});
 test('competing edits to the same task require review',()=>{const base=make(),local=structuredClone(base),remote=structuredClone(base);local.notes[0].tasks[0].text='Task A';remote.notes[0].tasks[0].text='Task B';assert.deepEqual(mergeTackDocuments(base,local,remote).conflicts,['note:n.task:t.text']);});
 test('never drops a new cloud note when local board was deleted',()=>{const base=make(),local=structuredClone(base),remote=structuredClone(base);local.boards=[{id:'other',name:'Other',createdAt:2}];local.notes=[];remote.notes.push({...remote.notes[0],id:'new'});assert.ok(mergeTackDocuments(base,local,remote).conflicts.includes('note-on-deleted-board'));});
+
+test('choosing local board rename keeps independent remote checklist update',()=>{
+ const base=make(),local=structuredClone(base),remote=structuredClone(base);
+ local.boards[0].name='Planning Phase';remote.boards[0].name='Planning v2';remote.notes[0].tasks[0].done=true;
+ const merged=mergeTackDocuments(base,local,remote,{preferLocalConflicts:true});
+ assert.ok(merged.conflicts.includes('board:a.name'));
+ assert.equal(merged.data.boards[0].name,'Planning Phase');
+ assert.equal(merged.data.notes[0].tasks[0].done,true);
+});

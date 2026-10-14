@@ -15,7 +15,7 @@ import {
 import styles from "./tackboard.module.css";
 import { useTackCloud } from "@/features/tackboard/useTackCloud";
 
-type Dialog = "note" | "board" | "help" | null;
+type Dialog = "note" | "board" | "rename" | "help" | null;
 type Filter = "all" | NoteStatus;
 const now = () => Date.now();
 const noteColorNames: Record<NoteColor, string> = {
@@ -31,7 +31,7 @@ function downloadText(name: string, body: string) {
 export default function TackboardClient() {
   const { data, ready, accountEmail, accountId, status: syncStatus, message: syncMessage,
     setMessage: setSyncMessage, conflict: syncConflict, chooseConflict, hasGuestNotes,
-    importGuest, edit: mutate, replaceData, syncNow, signOut, theme, setTheme } = useTackCloud();
+    importGuest, edit: mutate, replaceData, syncNow, saveNow, cloudRevision, lastSavedAt, signOut, theme, setTheme } = useTackCloud();
   const [pairToken, setPairToken] = useState("");
   const [pairedDevices, setPairedDevices] = useState<{id:string;label:string}[]>([]);
   const [showDevices, setShowDevices] = useState(false);
@@ -71,6 +71,15 @@ export default function TackboardClient() {
   const [dialog, setDialog] = useState<Dialog>(null);
   const [draft, setDraft] = useState<Note | null>(null);
   const [boardName, setBoardName] = useState("");
+  const [manualBusy, setManualBusy] = useState(false);
+  const runManualSync = async (saveOnly: boolean) => {
+    if (manualBusy) return;
+    setManualBusy(true);
+    try {
+      const ok = await (saveOnly ? saveNow() : syncNow());
+      if (ok) setNotice(saveOnly ? "Saved to the cloud." : "Cloud sync complete. Your boards are up to date.");
+    } finally { setManualBusy(false); }
+  };
   const [mobileNav, setMobileNav] = useState(false);
   const [animating, setAnimating] = useState<string[]>([]);
   const [lastArchived, setLastArchived] = useState<string | null>(null);
@@ -175,12 +184,21 @@ export default function TackboardClient() {
     const next = makeBoard(name);
     mutate(d => ({ ...d, boards: [...d.boards, next], activeBoardId: next.id }));
     setSelectedBoard(next.id); setBoardName(""); setDialog(null); setShowArchive(false); setFilter("all"); setMobileNav(false);
+    if (accountId) void saveNow();
   };
   const renameBoard = () => {
     if (!board) return;
-    const updated = window.prompt("Rename board", board.name);
-    if (!updated?.trim()) return;
-    mutate(d => ({ ...d, boards: d.boards.map(b => b.id === board.id ? { ...b, name: updated.trim().slice(0, 58) } : b) }));
+    setBoardName(board.name);
+    setDialog("rename");
+  };
+  const saveBoardName = () => {
+    if (!board || !boardName.trim()) return;
+    const name = boardName.trim().slice(0, 58);
+    if (board.name !== name) {
+      mutate(d => ({ ...d, boards: d.boards.map(b => b.id === board.id ? { ...b, name } : b) }));
+      if (accountId) void saveNow();
+    }
+    setDialog(null); setBoardName("");
   };
   const deleteBoard = () => {
     if (!board || !data || data.boards.length === 1) { setNotice("Keep at least one board in your workspace."); return; }
@@ -295,14 +313,15 @@ export default function TackboardClient() {
       <div className={styles.sidebarBottom}>
         <div className={styles.cloudSummary} role="status">
           <span className={styles.greenDot}/>
-          <div><strong>{accountEmail ? "Personal cloud" : "Local workspace"}</strong><small>{syncStatus === "conflict" ? "A real edit conflict needs review" : syncStatus === "offline" ? "Offline · changes kept on device" : syncStatus === "saving" ? "Saving changes…" : accountEmail ? "Changes save quietly" : "Saved on this device"}</small></div>
+          <div><strong>{accountEmail ? "Personal cloud" : "Local workspace"}</strong><small>{syncStatus === "conflict" ? "Review conflicting edits" : syncStatus === "offline" ? "Not synced · changes remain on this device" : syncStatus === "saving" ? "Saving changes…" : accountEmail && syncStatus === "synced" ? `Saved to cloud · rev ${cloudRevision}` : "Saved on this device"}</small></div>
         </div>
         <details className={styles.sideDisclosure}>
           <summary><span><Cloud size={16}/> Cloud & desktop</span><ChevronDown size={15}/></summary>
           <div className={styles.sideDisclosureBody}>
             <Link href="/app/tackboard/desktop" className={styles.sideItem}><Monitor size={15}/> Get desktop TackBoard <ArrowUpRight size={13}/></Link>
             {accountId && <>
-              <button className={styles.sideItem} onClick={syncNow}><RefreshCw size={14}/> Sync now</button>
+              <small className={styles.cloudDetails}>Account {accountId.slice(0, 8)}… · Cloud revision {cloudRevision}{lastSavedAt ? ` · Checked ${new Date(lastSavedAt).toLocaleTimeString()}` : ""}</small>
+              <button className={styles.sideItem} disabled={manualBusy} onClick={() => void runManualSync(false)}><RefreshCw size={14}/> {manualBusy ? "Syncing…" : "Sync now"}</button>
               {hasGuestNotes && <button className={styles.sideItem} onClick={importGuest}>Move guest notes to cloud</button>}
               <button className={styles.sideItem} onClick={() => { setShowDevices(v=>!v); if (!showDevices) void loadDevices(); }}><Link2 size={14}/> Desktop companion</button>
               {showDevices && <div className={styles.devices}><strong>Connect TackBoard Desktop</strong><p>Generate a pairing key and paste it into the desktop Settings.</p><button className={styles.exportButton} disabled={pairBusy} onClick={pairDevice}>Generate pairing key</button>
@@ -333,7 +352,7 @@ export default function TackboardClient() {
         <div className={styles.topActions}><button className={styles.themeSwitch} onClick={() => setTheme(theme === "dark" ? "light" : "dark")} title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`} aria-label="Toggle TackBoard color theme">{theme === "dark" ? <Sun size={17}/> : <Moon size={17}/>}<span>{theme === "dark" ? "LIGHT" : "DARK"}</span></button><span className={styles.syncState} aria-label={syncStatus === "offline" ? "Offline, edits stored locally" : syncStatus === "conflict" ? "Sync conflict needs attention" : accountId ? "Cloud backup enabled" : "Saved on this device"} title={syncStatus === "offline" ? "Offline — edits are safe on this device and will retry" : syncStatus === "conflict" ? "Resolve the cloud conflict below" : accountId ? "Cloud backup runs automatically" : "Local-only board"}>{syncStatus === "offline" || syncStatus === "conflict" ? <CloudOff size={15}/> : accountId ? <Cloud size={15}/> : <Monitor size={15}/>} {syncStatus === "offline" ? "OFFLINE" : syncStatus === "conflict" ? "ACTION NEEDED" : accountId ? "CLOUD" : "LOCAL"}</span><span className={styles.privateLabel}><span className={styles.greenDot}/> PERSONAL BOARD</span><button className={styles.topHelp} onClick={() => setDialog("help")} aria-label="About Tackboard"><CircleHelp size={18}/></button><Link className={styles.topBack} href="/app"><ArrowUpRight size={17}/> Archeon Apps</Link></div>
       </header>
       <div className={styles.workspace}>
-        <div className={styles.headingRow}><div><div className={styles.eyebrow}><span className={styles.greenDot}/> YOUR SPACE TO THINK CLEARLY</div><h1>{showArchive ? "Off the board." : board?.name ?? "Your board"}<span className={styles.headingPeriod}>.</span></h1><p>{showArchive ? "Finished notes stay here until you choose to restore or delete them." : "Make a note. Make some progress. Peel it away."}</p></div><div className={styles.headingActions}>{!showArchive && <button className={styles.primaryButton} onClick={startNote}><Plus size={17}/> New sticky note</button>}<button className={styles.iconButton} title="Rename board" aria-label="Rename board" onClick={renameBoard}><Pencil size={17}/></button><button className={styles.iconButton} title="Delete board" aria-label="Delete board" onClick={deleteBoard}><Trash2 size={17}/></button></div></div>
+        <div className={styles.headingRow}><div><div className={styles.eyebrow}><span className={styles.greenDot}/> YOUR SPACE TO THINK CLEARLY</div><h1>{showArchive ? "Off the board." : board?.name ?? "Your board"}<span className={styles.headingPeriod}>.</span></h1><p>{showArchive ? "Finished notes stay here until you choose to restore or delete them." : "Make a note. Make some progress. Peel it away."}</p></div><div className={styles.headingActions}>{accountId && <button className={styles.secondaryButton} disabled={manualBusy || syncStatus === "conflict"} onClick={() => void runManualSync(true)}><Cloud size={15}/> {manualBusy ? "Saving…" : syncStatus === "synced" ? "Saved" : "Save to cloud"}</button>}{!showArchive && <button className={styles.primaryButton} onClick={startNote}><Plus size={17}/> New sticky note</button>}<button className={styles.iconButton} title="Rename board" aria-label="Rename board" onClick={renameBoard}><Pencil size={17}/></button><button className={styles.iconButton} title="Delete board" aria-label="Delete board" onClick={deleteBoard}><Trash2 size={17}/></button></div></div>
         <div className={styles.summaryRow}><div className={styles.summaryUnit}><strong>{String(activeNotes.length).padStart(2,"0")}</strong><span>ON THE BOARD</span></div><div className={styles.summaryUnit}><strong>{String(completeTasks).padStart(2,"0")} <em>/ {String(totalTasks).padStart(2,"0")}</em></strong><span>TASKS TICKED OFF</span></div><div className={styles.summaryUnit}><strong>{String(archivedNotes.length).padStart(2,"0")}</strong><span>NOTES PEELED AWAY</span></div><div className={styles.summaryProgress}><span>SMALL STEPS ADD UP</span><div><i style={{width:`${totalTasks ? Math.round(completeTasks/totalTasks*100) : 0}%`}} /></div></div></div>
         <div className={styles.toolsRow}><div className={styles.filterTabs} aria-label="Filter notes">{!showArchive ? <><button className={filter === "all" ? styles.currentFilter : ""} onClick={() => setFilter("all")}>All notes</button>{STATUSES.filter(s => s.id !== "done").map(s => <button className={filter === s.id ? styles.currentFilter : ""} key={s.id} onClick={() => setFilter(s.id)}>{s.label}</button>)}</> : <button className={styles.currentFilter} onClick={() => setShowArchive(false)}>Completed <X size={13}/></button>}</div><label className={styles.searchBox}><Search size={16}/><input value={search} onChange={e => setSearch(e.target.value)} placeholder="Find a note..." aria-label="Search notes"/></label></div>
         <section className={styles.canvasSection} aria-label={showArchive ? "Completed sticky notes" : "Sticky note board"}>
@@ -356,12 +375,13 @@ export default function TackboardClient() {
         <div className={styles.pageFoot}><span>Small things become big things. One note at a time.</span><span>tackboard. / built by <Link href="/">archeon</Link></span></div>
       </div>
     </main>
-    {syncConflict && <div className={styles.conflictPanel} role="alertdialog" aria-label="Cloud synchronization conflict"><strong>Changes from another device</strong><p>Your cloud board changed while this device was editing. Choose which version to keep. Loading the cloud version preserves your local draft in a browser recovery backup.</p><div><button onClick={() => chooseConflict("cloud")}>Use cloud version</button><button onClick={() => { if (window.confirm("Replace the newer cloud board with this device's board?")) chooseConflict("device"); }}>Keep this device&apos;s version</button></div></div>}
+    {syncConflict && <div className={styles.conflictPanel} role="alertdialog" aria-label="Cloud synchronization conflict"><strong>Changes from another device</strong><p>Both devices changed the same information. Independent changes will still be merged. Choosing a version creates a recovery backup of this device first.</p>{!!syncConflict.reasons?.length && <p className={styles.conflictDetails}>Conflicting changes: {syncConflict.reasons.slice(0, 3).join(", ")}{syncConflict.reasons.length > 3 ? ` +${syncConflict.reasons.length - 3} more` : ""}</p>}<div><button onClick={() => chooseConflict("cloud")}>Use cloud version</button><button onClick={() => { if (window.confirm("Prefer this device's conflicting changes? Independent cloud edits will be preserved where possible. Export backups first.")) chooseConflict("device"); }}>Keep this device&apos;s edits</button></div></div>}
     {(lastArchived || notice || syncMessage) && <div className={styles.toast} role="status"><span>{syncMessage || notice || "A note was peeled off your board."}</span>{lastArchived && !syncMessage && <button onClick={() => restoreNote(lastArchived)}>Undo</button>}{(notice || syncMessage) && <button onClick={() => { setNotice(""); setSyncMessage(""); }} aria-label="Dismiss"><X size={14}/></button>}</div>}
     {dialog && <div className={styles.overlay} onMouseDown={e => { if (e.target === e.currentTarget) { setDialog(null); setDraft(null); } }}>
       <div className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="tack-dialog-title" onKeyDown={e => { if (e.key === "Escape") { setDialog(null); setDraft(null); } }}>
-        <div className={styles.modalHeader}><div><span>{dialog === "note" ? "STICKY NOTE" : dialog === "board" ? "YOUR WORKSPACE" : "A LITTLE GUIDE"}</span><h2 id="tack-dialog-title">{dialog === "note" ? (draft && data.notes.some(n => n.id === draft.id) ? "Edit your note" : "A fresh note") : dialog === "board" ? "New board" : "Make it yours"}</h2></div><button className={styles.iconButton} onClick={() => { setDialog(null); setDraft(null); }} aria-label="Close"><X size={20}/></button></div>
+        <div className={styles.modalHeader}><div><span>{dialog === "note" ? "STICKY NOTE" : dialog === "board" || dialog === "rename" ? "YOUR WORKSPACE" : "A LITTLE GUIDE"}</span><h2 id="tack-dialog-title">{dialog === "note" ? (draft && data.notes.some(n => n.id === draft.id) ? "Edit your note" : "A fresh note") : dialog === "board" ? "New board" : dialog === "rename" ? "Rename board" : "Make it yours"}</h2></div><button className={styles.iconButton} onClick={() => { setDialog(null); setDraft(null); }} aria-label="Close"><X size={20}/></button></div>
         {dialog === "board" && <form onSubmit={e => { e.preventDefault(); createBoard(); }}><label className={styles.fieldLabel}>BOARD NAME<input autoFocus value={boardName} onChange={e => setBoardName(e.target.value.slice(0,58))} placeholder="e.g. Website launch" required maxLength={58}/></label><div className={styles.modalActions}><button type="button" className={styles.secondaryButton} onClick={() => setDialog(null)}>Cancel</button><button className={styles.primaryButton} type="submit"><Plus size={16}/> Create board</button></div></form>}
+        {dialog === "rename" && <form onSubmit={e => { e.preventDefault(); saveBoardName(); }}><label className={styles.fieldLabel}>BOARD NAME<input autoFocus value={boardName} onChange={e => setBoardName(e.target.value.slice(0,58))} required maxLength={58}/></label><div className={styles.modalActions}><button type="button" className={styles.secondaryButton} onClick={() => setDialog(null)}>Cancel</button><button className={styles.primaryButton} type="submit"><Check size={16}/> Save board name</button></div></form>}
         {dialog === "note" && draft && <form onSubmit={e => { e.preventDefault(); saveNote(); }}><label className={styles.fieldLabel}>TITLE<input autoFocus value={draft.title} maxLength={90} onChange={e => setDraft({ ...draft, title:e.target.value })} placeholder="What are you working on?" required/></label><label className={styles.fieldLabel}>A LITTLE CONTEXT (OPTIONAL)<textarea value={draft.body} maxLength={1200} onChange={e => setDraft({ ...draft, body:e.target.value })} placeholder="A quick thought, reminder or goal..." rows={3}/></label>
           <div className={styles.twoFields}><label className={styles.fieldLabel}>STATUS<select value={draft.status} onChange={e => setDraft({ ...draft, status: e.target.value as NoteStatus })}>{STATUSES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}</select></label><div className={styles.fieldLabel}>PAPER COLOR<div className={styles.colorChoices}>{COLORS.map(color => <button type="button" key={color} title={noteColorNames[color]} aria-label={noteColorNames[color]} aria-pressed={draft.color === color} className={`${styles.colorChoice} ${styles[`color_${color}`]} ${draft.color === color ? styles.colorChosen : ""}`} onClick={() => setDraft({ ...draft, color })}>{draft.color === color && <Check size={14}/>}</button>)}</div></div></div>
           <div className={styles.editorTasks}><div className={styles.editorTasksTop}><span>CHECKLIST <small>({draft.tasks.length}/35)</small></span><button type="button" onClick={() => { if (draft.tasks.length < 35) setDraft({ ...draft, tasks:[...draft.tasks,{id:freshId(),text:"",done:false}] }); }}><Plus size={15}/> Add task</button></div>{draft.tasks.map((task,i) => <div key={task.id} className={styles.editorTask}><button aria-label={task.done ? "Mark incomplete" : "Mark complete"} title="Toggle completed" type="button" onClick={() => setDraft({ ...draft, tasks:draft.tasks.map(t => t.id === task.id ? {...t,done:!t.done} : t) })}><span className={task.done ? styles.editorChecked : styles.editorUnchecked}>{task.done && <Check size={13}/>}</span></button><input aria-label={`Task ${i+1}`} placeholder={`Task ${i+1}`} value={task.text} maxLength={180} onChange={e => setDraft({ ...draft, tasks:draft.tasks.map(t => t.id === task.id ? {...t,text:e.target.value} : t) })}/><button aria-label={`Remove task ${i+1}`} title="Remove task" type="button" onClick={() => setDraft({ ...draft, tasks:draft.tasks.filter(t => t.id !== task.id) })}><X size={15}/></button></div>)}</div>

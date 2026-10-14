@@ -149,3 +149,8 @@
 .sideItem svg:last-child:not(:first-child){margin-left:auto}
 .sideDisclosure .devices{margin:7px 0 5px}
 @media(max-width:1050px){.sidebar{min-height:0;overflow-y:auto}.allAppsLink{margin-bottom:22px}}
+
+/* Quiet account diagnostics: visible only in the expanded Cloud & desktop menu. */
+.cloudDetails{display:block;padding:2px 11px 8px;font-size:10px;line-height:1.5;color:var(--archeon-app-muted,#89958c);overflow-wrap:anywhere}
+
+.conflictDetails{font-size:11px;overflow-wrap:anywhere;opacity:.86}
