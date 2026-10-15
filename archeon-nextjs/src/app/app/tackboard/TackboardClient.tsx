@@ -14,7 +14,7 @@ import {
 } from "@/features/tackboard/model";
 import styles from "./tackboard.module.css";
 import { useTackCloud } from "@/features/tackboard/useTackCloud";
-import { clampNotePosition, draggedNotePosition, edgeScrollVelocity, workspaceDimensions } from "@/features/tackboard/workspaceGeometry";
+import { clampNotePosition, draggedNotePosition, dragCanvasDimensions, edgeScrollVelocity, nextNotePosition, workspaceDimensions } from "@/features/tackboard/workspaceGeometry";
 
 type Dialog = "note" | "board" | "rename" | "help" | null;
 type Filter = "all" | NoteStatus;
@@ -89,12 +89,28 @@ export default function TackboardClient() {
   const [notice, setNotice] = useState("");
   const boardRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
+  const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
+  const revealNoteRef = useRef<string | null>(null);
   const [boardFocused, setBoardFocused] = useState(false);
   const [frontNoteId, setFrontNoteId] = useState<string | null>(null);
   useEffect(() => {
     try { setBoardFocused(localStorage.getItem("archeon:tackboard:expanded-board") === "1"); }
     catch { /* Browser storage is optional. */ }
   }, []);
+  useEffect(() => {
+    if (!ready || !viewportRef.current) return;
+    const viewport = viewportRef.current;
+    const measure = () => {
+      const width = viewport.clientWidth;
+      const height = viewport.clientHeight;
+      setViewportSize(previous => previous.width === width && previous.height === height ? previous : { width, height });
+    };
+    measure();
+    const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(measure) : null;
+    observer?.observe(viewport);
+    window.addEventListener("resize", measure);
+    return () => { observer?.disconnect(); window.removeEventListener("resize", measure); };
+  }, [ready, boardFocused]);
   const toggleBoardFocus = () => {
     const next = !boardFocused;
     setBoardFocused(next);
@@ -117,6 +133,7 @@ export default function TackboardClient() {
     x: number; y: number; nextX: number; nextY: number; layer: number;
     element: HTMLElement; handle: HTMLElement; frame: number | null;
     scrollX: number; scrollY: number; clientX: number; clientY: number;
+    layoutX: number; layoutY: number; originalCanvasWidth: string; originalCanvasHeight: string;
   } | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
@@ -148,13 +165,22 @@ export default function TackboardClient() {
   }).sort((a, b) => a.layer - b.layer), [activeNotes, archivedNotes, filter, search, showArchive]);
   const totalTasks = activeNotes.reduce((total, note) => total + progress(note).total, 0);
   const completeTasks = activeNotes.reduce((total, note) => total + progress(note).done, 0);
-  // Leave working space beyond the current notes. Both axes scroll within the board viewport.
-  // Long checklists can make a note taller than its minimum CSS height.
-  // Leave enough canvas for every note, even when a board contains 35 tasks.
+  // A board now hugs its visible notes and the actual viewport, with only a small margin.
+  // A long checklist is capped by the note's independently scrollable task list.
   const noteHeight = (note: Note) => Math.max(265, 175 + (note.body ? 75 : 0) + Math.min(285, note.tasks.length * 40));
   const { width: canvasWidth, height: canvasHeight } = workspaceDimensions(
-    boardNotes.map(note => ({ x: note.x, y: note.y, width: 247, height: noteHeight(note) })),
+    displayed.map(note => ({ x: note.x, y: note.y, width: 247, height: noteHeight(note) })),
+    viewportSize,
   );
+  useEffect(() => {
+    const noteId = revealNoteRef.current;
+    if (!noteId || !viewportRef.current) return;
+    const saved = activeNotes.find(note => note.id === noteId);
+    if (!saved) return;
+    revealNoteRef.current = null;
+    // New notes are revealed inside the scrollable area, never by scrolling the whole page.
+    viewportRef.current.scrollTo({ left: Math.max(0, saved.x - 24), top: Math.max(0, saved.y - 24), behavior: "smooth" });
+  }, [activeNotes]);
 
   const chooseBoard = (id: string) => {
     setSelectedBoard(id);
@@ -165,11 +191,15 @@ export default function TackboardClient() {
   const startNote = () => {
     if (!boardId) return;
     const draftNote = makeNote(boardId, activeNotes.length);
-    // Keep newly created notes visible even on narrower canvases.
-    const visibleWidth = viewportRef.current?.clientWidth ?? 1000;
-    const columns = Math.max(1, Math.floor((visibleWidth - 40) / 272));
-    draftNote.x = 26 + (activeNotes.length % columns) * 272 + (viewportRef.current?.scrollLeft ?? 0);
-    draftNote.y = 28 + Math.floor(activeNotes.length / columns) * 312 + (viewportRef.current?.scrollTop ?? 0);
+    // Look for free space close to what the user is currently viewing.
+    const viewport = viewportRef.current;
+    const position = nextNotePosition(
+      activeNotes.map(note => ({ x: note.x, y: note.y, width: 247, height: noteHeight(note) })),
+      { width: viewport?.clientWidth ?? 900, height: viewport?.clientHeight ?? 650,
+        scrollLeft: viewport?.scrollLeft ?? 0, scrollTop: viewport?.scrollTop ?? 0 },
+    );
+    draftNote.x = position.x;
+    draftNote.y = position.y;
     setFilter("all"); setDraft(draftNote); setDialog("note");
   };
   const editNote = (note: Note) => { setDraft(structuredClone(note)); setDialog("note"); };
@@ -177,6 +207,7 @@ export default function TackboardClient() {
     if (!draft || !draft.title.trim()) return;
     const clean = { ...draft, title: draft.title.trim().slice(0, 90), body: draft.body.slice(0, 1200),
       tasks: draft.tasks.filter(t => t.text.trim()).map(t => ({ ...t, text: t.text.trim().slice(0, 180) })).slice(0, 35), updatedAt: now() };
+    if (!data?.notes.some(note => note.id === clean.id)) revealNoteRef.current = clean.id;
     mutate(d => ({ ...d, notes: d.notes.some(n => n.id === clean.id) ? d.notes.map(n => n.id === clean.id ? clean : n) : [...d.notes, clean] }));
     setDialog(null); setDraft(null); setShowArchive(false); setSearch("");
   };
@@ -297,10 +328,9 @@ export default function TackboardClient() {
     replaceData(imported); setSelectedBoard(imported.activeBoardId); setShowArchive(false); setNotice("Backup imported successfully.");
   };
   const nudgeNote = (note: Note, dx: number, dy: number) => {
-    const positioned = clampNotePosition({ x: note.x + dx, y: note.y + dy },
-      { width: canvasWidth, height: canvasHeight }, { width: 247, height: noteHeight(note) });
-    const newX = positioned.x;
-    const newY = positioned.y;
+    // Keyboard movement grows the board instead of stopping at its current edge.
+    const newX = Math.max(18, Math.min(7000, note.x + dx));
+    const newY = Math.max(18, Math.min(7000, note.y + dy));
     mutate(previous => ({ ...previous, notes: previous.notes.map(item => item.id === note.id
       ? { ...item, x: newX, y: newY, updatedAt: now() } : item) }));
     setFrontNoteId(note.id);
@@ -325,6 +355,10 @@ export default function TackboardClient() {
       scrollX: viewportRef.current?.scrollLeft ?? 0, scrollY: viewportRef.current?.scrollTop ?? 0,
       x: element.offsetLeft, y: element.offsetTop,
       nextX: element.offsetLeft, nextY: element.offsetTop, layer,
+      layoutX: (boardRef.current?.getBoundingClientRect().left ?? 0) + (viewportRef.current?.scrollLeft ?? 0),
+      layoutY: (boardRef.current?.getBoundingClientRect().top ?? 0) + (viewportRef.current?.scrollTop ?? 0),
+      originalCanvasWidth: boardRef.current?.style.width ?? "",
+      originalCanvasHeight: boardRef.current?.style.height ?? "",
       element, handle, frame: null,
     };
     document.body.style.userSelect = "none";
@@ -341,7 +375,32 @@ export default function TackboardClient() {
       if (viewport) {
         // Auto-scroll when a dragged note reaches the visible edges, on both axes.
         const rect = viewport.getBoundingClientRect();
-        const { x: dx, y: dy } = edgeScrollVelocity(drag.clientX, drag.clientY, rect);
+        const velocity = edgeScrollVelocity(drag.clientX, drag.clientY, rect);
+        const { x: dx, y: dy } = velocity;
+        const canvas = boardRef.current;
+        if (canvas) {
+          // Extend the compact paper as the note approaches its own right/bottom edge,
+          // even when that edge is still far from the browser viewport's edge.
+          const shiftX = drag.layoutX - (canvas.getBoundingClientRect().left + viewport.scrollLeft);
+          const shiftY = drag.layoutY - (canvas.getBoundingClientRect().top + viewport.scrollTop);
+          const desiredX = drag.x + drag.clientX - drag.startX + viewport.scrollLeft - drag.scrollX + shiftX;
+          const desiredY = drag.y + drag.clientY - drag.startY + viewport.scrollTop - drag.scrollY + shiftY;
+          if (desiredX + drag.element.offsetWidth + 36 > canvas.clientWidth - 18)
+            canvas.style.width = `${Math.min(7700, Math.max(canvas.clientWidth + 240, desiredX + drag.element.offsetWidth + 90))}px`;
+          if (desiredY + drag.element.offsetHeight + 36 > canvas.clientHeight - 18)
+            canvas.style.height = `${Math.min(7700, Math.max(canvas.clientHeight + 240, desiredY + drag.element.offsetHeight + 90))}px`;
+        }
+        if (canvas && (dx > 0 || dy > 0)) {
+          // Grow only during an active drag, and only when reaching the current edge.
+          // The temporary extra room disappears when the note is released.
+          const next = dragCanvasDimensions(
+            { width: canvas.clientWidth, height: canvas.clientHeight },
+            { width: viewport.clientWidth, height: viewport.clientHeight,
+              scrollLeft: viewport.scrollLeft, scrollTop: viewport.scrollTop }, velocity,
+          );
+          if (next.width > canvas.clientWidth) canvas.style.width = `${next.width}px`;
+          if (next.height > canvas.clientHeight) canvas.style.height = `${next.height}px`;
+        }
         if (dx || dy) {
           const beforeX = viewport.scrollLeft;
           const beforeY = viewport.scrollTop;
@@ -355,11 +414,13 @@ export default function TackboardClient() {
         pointerCurrent: { x: drag.clientX, y: drag.clientY },
         scrollStart: { x: drag.scrollX, y: drag.scrollY },
         scrollCurrent: { x: viewport?.scrollLeft ?? 0, y: viewport?.scrollTop ?? 0 },
-        canvas: { width: boardRef.current?.clientWidth ?? 1500, height: boardRef.current?.clientHeight ?? 1050 },
+        layoutShift: { x: drag.layoutX - ((boardRef.current?.getBoundingClientRect().left ?? 0) + (viewport?.scrollLeft ?? 0)),
+          y: drag.layoutY - ((boardRef.current?.getBoundingClientRect().top ?? 0) + (viewport?.scrollTop ?? 0)) },
+        canvas: { width: boardRef.current?.clientWidth ?? 280, height: boardRef.current?.clientHeight ?? 300 },
         note: { width: drag.element.offsetWidth, height: drag.element.offsetHeight },
       });
-      drag.nextX = position.x;
-      drag.nextY = position.y;
+      drag.nextX = Math.min(7000, position.x);
+      drag.nextY = Math.min(7000, position.y);
       drag.element.style.setProperty("--drag-x", `${drag.nextX - drag.x}px`);
       drag.element.style.setProperty("--drag-y", `${drag.nextY - drag.y}px`);
       if (viewport) {
@@ -390,13 +451,20 @@ export default function TackboardClient() {
         pointerCurrent: { x: drag.clientX, y: drag.clientY },
         scrollStart: { x: drag.scrollX, y: drag.scrollY },
         scrollCurrent: { x: viewport?.scrollLeft ?? 0, y: viewport?.scrollTop ?? 0 },
-        canvas: { width: boardRef.current?.clientWidth ?? 1500, height: boardRef.current?.clientHeight ?? 1050 },
+        layoutShift: { x: drag.layoutX - ((boardRef.current?.getBoundingClientRect().left ?? 0) + (viewport?.scrollLeft ?? 0)),
+          y: drag.layoutY - ((boardRef.current?.getBoundingClientRect().top ?? 0) + (viewport?.scrollTop ?? 0)) },
+        canvas: { width: boardRef.current?.clientWidth ?? 280, height: boardRef.current?.clientHeight ?? 300 },
         note: { width: drag.element.offsetWidth, height: drag.element.offsetHeight },
       });
-      drag.nextX = position.x;
-      drag.nextY = position.y;
+      drag.nextX = Math.min(7000, position.x);
+      drag.nextY = Math.min(7000, position.y);
       draggingRef.current = null;
       document.body.style.userSelect = "";
+      // Release temporary drag space; the fitted canvas follows the saved note extent.
+      if (boardRef.current) {
+        boardRef.current.style.width = drag.originalCanvasWidth;
+        boardRef.current.style.height = drag.originalCanvasHeight;
+      }
       drag.element.style.left = `${drag.nextX}px`;
       drag.element.style.top = `${drag.nextY}px`;
       drag.element.style.removeProperty("--drag-x");
@@ -419,6 +487,10 @@ export default function TackboardClient() {
       const drag = draggingRef.current;
       if (drag?.frame != null) cancelAnimationFrame(drag.frame);
       if (drag) { drag.element.style.removeProperty("--drag-x"); drag.element.style.removeProperty("--drag-y"); }
+      if (drag && boardRef.current) {
+        boardRef.current.style.width = drag.originalCanvasWidth;
+        boardRef.current.style.height = drag.originalCanvasHeight;
+      }
       draggingRef.current = null;
       document.body.style.userSelect = "";
     };
@@ -493,6 +565,7 @@ export default function TackboardClient() {
             <span><Pin size={14}/> {showArchive ? "ARCHIVED NOTES" : "THE PINBOARD"}</span>
             <div className={styles.canvasControls}>
               <span>{showArchive ? "RESTORE ANYTIME" : "SCROLL BOTH WAYS · DRAG FROM THE TOP"}</span>
+              {!showArchive && <button type="button" className={styles.boardNewNoteButton} onClick={startNote} aria-label="Create a new sticky note"><Plus size={16}/> New Note +</button>}
               <button type="button" className={styles.boardFocusButton} onClick={toggleBoardFocus} aria-pressed={boardFocused} title={boardFocused ? "Minimize pinboard workspace" : "Expand pinboard workspace"}>
                 {boardFocused ? <Minimize2 size={15}/> : <Maximize2 size={15}/>}
                 <span>{boardFocused ? "Minimize" : "Expand"}</span>
@@ -500,7 +573,9 @@ export default function TackboardClient() {
             </div>
           </div>
           <div ref={viewportRef} className={styles.boardViewport} tabIndex={0} role="region" aria-label="Scrollable pinboard. Scroll horizontally or vertically to explore your notes.">
-          <div ref={boardRef} className={`${styles.boardCanvas} ${showArchive ? styles.archiveCanvas : ""}`} style={{ minHeight: showArchive ? 460 : canvasHeight, minWidth: showArchive ? "100%" : canvasWidth }}>
+          <div ref={boardRef} className={`${styles.boardCanvas} ${showArchive ? styles.archiveCanvas : ""}`} style={{ width: showArchive ? "100%" : canvasWidth,
+            height: showArchive ? undefined : canvasHeight,
+            minHeight: showArchive ? Math.max(380, viewportSize.height) : canvasHeight }}>
             {displayed.length === 0 ? <div className={styles.empty}><div className={styles.emptyIcon}><ClipboardList size={28}/></div><h2>{search ? "No matching notes." : showArchive ? "Nothing peeled away yet." : "A fresh page."}</h2><p>{search ? "Try searching for something else." : showArchive ? "Finished notes will appear here." : "Every good plan starts with one note."}</p>{!showArchive && !search && <button className={styles.primaryButton} onClick={startNote}><Plus size={17}/> Create your first note</button>}</div> : displayed.map(note => {
               const amount = progress(note);
               const bounded = clampNotePosition({ x: note.x, y: note.y },
@@ -523,7 +598,6 @@ export default function TackboardClient() {
                 {animating.includes(note.id) && <span className={styles.peelBadge}><CheckCheck size={18}/> {allTasksComplete(note) ? "All done!" : "Peeling away"}</span>}
               </article>;
             })}
-            {!showArchive && displayed.length > 0 && !search && filter === "all" && <button className={styles.addOnCanvas} onClick={startNote}><Plus size={25}/><span>New note</span></button>}
           </div>
           </div>
         </section>

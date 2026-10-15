@@ -12,7 +12,7 @@ const moduleRef = { exports: {} };
 vm.runInNewContext(transpiled.outputText, { module: moduleRef, exports: moduleRef.exports }, { timeout: 1000 });
 const { workspaceDimensions, clampNotePosition, draggedNotePosition } = moduleRef.exports;
 const canvas = workspaceDimensions([{x:20,y:25,width:247,height:540},{x:1700,y:1200,width:247,height:380}]);
-assert.ok(canvas.width >= 2027 && canvas.height >= 1660, 'large canvas includes tall, distant notes');
+assert.ok(canvas.width >= 1983 && canvas.height >= 1616, 'canvas fits tall, distant notes with a tight paper margin');
 const inside = clampNotePosition({x:-500,y:Infinity}, {width:1000,height:700}, {width:247,height:265});
 assert.equal(inside.x,18);assert.equal(inside.y,18);
 const max = clampNotePosition({x:9000,y:9000}, {width:1000,height:700},{width:247,height:265});

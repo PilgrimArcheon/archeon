@@ -277,3 +277,42 @@
 
 .peelFlight .peelBadge{z-index:5;animation:tackboardStamp 1.75s ease-in-out both}
 @keyframes tackboardStamp{0%,12%{opacity:0;transform:translate(-50%,-45%) rotate(6deg) scale(.85)}25%,72%{opacity:1;transform:translate(-50%,-50%) rotate(6deg) scale(1)}100%{opacity:0;transform:translate(-50%,-70%) rotate(9deg)}}
+
+/* Adaptive canvas: the visible board sets its minimum extent, not a fixed giant paper sheet.
+   Its action lives outside the scrolling viewport and stays reachable at every zoom/size. */
+
+.boardViewport{
+  display:flex;
+  justify-content:safe center;
+  align-items:safe center;
+  background:#f4f5ef;
+}
+.boardCanvas{
+  flex:0 0 auto;
+  min-width:0;
+  border:1px solid #e1e4d9;
+  border-radius:6px;
+  box-shadow:0 7px 30px #1721190b;
+}
+.app[data-tack-theme="dark"] .boardViewport{background:#191c1a}
+.app[data-tack-theme="dark"] .boardCanvas{border-color:#313931;box-shadow:0 7px 35px #0003}
+
+.boardNewNoteButton{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  flex:none;min-height:33px;padding:7px 13px;
+  border-radius:8px;border:1px solid #47775a!important;
+  background:#426f57!important;color:#fff!important;
+  font-size:11px!important;font-weight:800!important;letter-spacing:0;
+  white-space:nowrap;box-shadow:0 2px 5px #15251a18;
+}
+.boardNewNoteButton:hover{background:#315c46!important}
+.boardNewNoteButton:focus-visible{outline:2px solid #89b4a0;outline-offset:2px}
+.app[data-tack-theme="dark"] .boardNewNoteButton{
+  background:#42765b!important;border-color:#5f926e!important;color:#fff!important;
+}
+@media(max-width:760px){
+  .canvasMeta{flex-wrap:wrap;padding:11px 13px}
+  .canvasControls{gap:8px;margin-left:auto}
+  .boardNewNoteButton{padding:6px 10px;font-size:10px!important;min-height:32px}
+  .canvasMeta .boardFocusButton{min-height:32px}
+}

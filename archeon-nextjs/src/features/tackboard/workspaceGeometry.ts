@@ -5,11 +5,61 @@ export type PinboardRect = { left: number; right: number; top: number; bottom: n
 export type PinboardNoteBounds = PinboardPoint & { width?: number; height?: number };
 export const PINBOARD_INSET = 18;
 
-/** Allow ample empty workspace while accounting for long checklist notes. */
-export function workspaceDimensions(notes: readonly PinboardNoteBounds[]): { width: number; height: number } {
+/**
+ * Fit the canvas to its viewport and the furthest visible note.
+ * Keep a compact paper surface centered inside the viewport. Only grow to
+ * accommodate the visible notes, with a small margin around them.
+ */
+export const PINBOARD_MARGIN = 36;
+export function workspaceDimensions(
+  notes: readonly PinboardNoteBounds[],
+  viewport: { width: number; height: number } = { width: 0, height: 0 },
+): { width: number; height: number } {
+  const noteRight = notes.reduce((max, note) => Math.max(max, Math.max(0, Number.isFinite(note.x) ? note.x : 0) + (note.width ?? 247)), 0);
+  const noteBottom = notes.reduce((max, note) => Math.max(max, Math.max(0, Number.isFinite(note.y) ? note.y : 0) + (note.height ?? 265)), 0);
+  const extra = notes.length ? PINBOARD_MARGIN : 0;
+  const preferredWidth = Math.min(560, viewport.width || 560);
+  const preferredHeight = Math.min(410, viewport.height || 410);
   return {
-    width: Math.max(1500, ...notes.map(note => Math.max(0, note.x) + (note.width === undefined ? 350 : note.width + 80))),
-    height: Math.max(1050, ...notes.map(note => Math.max(0, note.y) + (note.height === undefined ? 380 : note.height + 80))),
+    width: Math.ceil(Math.max(280, preferredWidth, noteRight + extra)),
+    height: Math.ceil(Math.max(300, preferredHeight, noteBottom + extra)),
+  };
+}
+
+/** Pick an unoccupied spot near the current scroll position, not a distant row. */
+export function nextNotePosition(
+  notes: readonly PinboardNoteBounds[],
+  viewport: { width: number; height: number; scrollLeft: number; scrollTop: number },
+): PinboardPoint {
+  const cellWidth = 272;
+  const cellHeight = 312;
+  const originX = Math.max(26, Math.floor(viewport.scrollLeft) + 26);
+  const originY = Math.max(28, Math.floor(viewport.scrollTop) + 28);
+  const columns = Math.max(1, Math.floor(Math.max(247, viewport.width - 52) / cellWidth));
+  for (let index = 0; index < Math.max(32, notes.length + 12); index++) {
+    const x = Math.min(7000, originX + (index % columns) * cellWidth);
+    const y = Math.min(7000, originY + Math.floor(index / columns) * cellHeight);
+    const overlaps = notes.some(note =>
+      x < note.x + (note.width ?? 247) + 14 && x + 247 + 14 > note.x &&
+      y < note.y + (note.height ?? 265) + 14 && y + 265 + 14 > note.y
+    );
+    if (!overlaps) return { x, y };
+  }
+  // A pathological densely packed board can still accept a note beside the current view.
+  return { x: Math.min(7000, originX), y: Math.min(7000, originY + (notes.length + 1) * cellHeight) };
+}
+
+/** Extend a temporary drag canvas only near the trailing scroll edges. */
+export function dragCanvasDimensions(
+  canvas: { width: number; height: number },
+  viewport: { width: number; height: number; scrollLeft: number; scrollTop: number },
+  velocity: PinboardPoint,
+): { width: number; height: number } {
+  return {
+    width: velocity.x > 0 && canvas.width - viewport.scrollLeft - viewport.width < 150
+      ? Math.min(7700, canvas.width + 300) : canvas.width,
+    height: velocity.y > 0 && canvas.height - viewport.scrollTop - viewport.height < 150
+      ? Math.min(7700, canvas.height + 300) : canvas.height,
   };
 }
 
@@ -46,9 +96,10 @@ export function draggedNotePosition(input: {
   scrollCurrent: PinboardPoint;
   canvas: { width: number; height: number };
   note: { width: number; height: number };
+  layoutShift?: PinboardPoint;
 }): PinboardPoint {
   return clampNotePosition({
-    x: input.origin.x + input.pointerCurrent.x - input.pointerStart.x + input.scrollCurrent.x - input.scrollStart.x,
-    y: input.origin.y + input.pointerCurrent.y - input.pointerStart.y + input.scrollCurrent.y - input.scrollStart.y,
+    x: input.origin.x + input.pointerCurrent.x - input.pointerStart.x + input.scrollCurrent.x - input.scrollStart.x + (input.layoutShift?.x ?? 0),
+    y: input.origin.y + input.pointerCurrent.y - input.pointerStart.y + input.scrollCurrent.y - input.scrollStart.y + (input.layoutShift?.y ?? 0),
   }, input.canvas, input.note);
 }
