@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { GlobalThemeControl } from "@/components/theme/GlobalThemeControl";
+import { AppLegalFooter } from "@/components/archeon/AppLegalFooter";
 
 /** Applications own their interface; the portfolio keeps its original chrome. */
 export function SiteShell({ children }: { children: ReactNode }) {
@@ -13,7 +14,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
 
   if (isApp) {
     const hasOwnTheme = pathname === "/app" || pathname === "/app/tackboard" || pathname === "/app/invoice";
-    return <><main id="main-content">{children}</main>{!hasOwnTheme && <GlobalThemeControl/>}</>;
+    return <><main id="main-content">{children}</main><AppLegalFooter/>{!hasOwnTheme && <GlobalThemeControl/>}</>;
   }
 
   return <>

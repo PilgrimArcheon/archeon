@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import styles from "./desktop.module.css";
+import { DesktopOpenHelp } from "./DesktopOpenHelp";
 
 export const metadata: Metadata = {
   title: "TackBoard Desktop",
@@ -168,6 +169,7 @@ export default async function DesktopPage() {
             Download only from the official GitHub release.
           </p>
         </section>
+        <DesktopOpenHelp />
         <section className={styles.steps}>
           <div className={styles.sectionHead}>
             <h2>Get started in three steps</h2>
@@ -214,7 +216,7 @@ export default async function DesktopPage() {
         </section>
         <footer className={styles.footer}>
           TackBoard by Archeon · Your web boards and desktop notes share one
-          account.
+          account. Preview builds are provided for testing. See our <Link href="/app/terms">Terms</Link> and <Link href="/app/privacy">Privacy Policy</Link>.
         </footer>
       </div>
     </main>

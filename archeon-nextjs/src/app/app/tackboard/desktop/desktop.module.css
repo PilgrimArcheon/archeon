@@ -17,3 +17,31 @@
 
 .notice a{color:#b8efe0;text-underline-offset:3px}
 :global(:root[data-theme="light"]) .notice a{color:#226a56}
+
+/* Preview installer support. Modal uses the browser's native focus trap and Escape handling. */
+.helpPanel{display:flex;align-items:center;gap:19px;padding:22px;margin-top:30px;background:#172c2c;border:1px solid #4b7770;border-radius:13px}
+.helpSymbol{flex:0 0 46px;width:46px;height:46px;border:1px solid #477b71;background:#20433d;display:grid;place-items:center;border-radius:12px;color:#bdf2dc}
+.helpCopy{flex:1;min-width:0}.helpCopy h2{margin:0 0 6px;font-size:17px;letter-spacing:-.02em}.helpCopy p{font-size:12px;line-height:1.7;color:#aacfc5;margin:0;max-width:580px}
+.helpTrigger{display:inline-flex;align-items:center;gap:6px;cursor:pointer;border:1px solid #b6ebda;border-radius:9px;padding:12px 15px;background:transparent;color:#c8f7e8;font-family:inherit;font-size:12px;font-weight:700;white-space:nowrap}
+.helpTrigger:hover{background:#24463e}.helpTrigger:focus-visible,.closeButton:focus-visible,.dialogDone:focus-visible{outline:3px solid #b6f8e4;outline-offset:3px}
+.helpDialog{color:#eafff5;background:#101d1e;width:min(650px,calc(100% - 28px));max-height:min(88dvh,900px);border:1px solid #47766c;border-radius:16px;padding:0;box-shadow:0 25px 90px #000b;overflow:auto}
+.helpDialog::backdrop{background:rgba(2,8,10,.78);backdrop-filter:blur(5px)}
+.dialogInner{padding:clamp(22px,4vw,34px)}.dialogTop{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.dialogKicker{color:#9ed6c4;font-size:10px;letter-spacing:.17em;margin:0 0 12px;font-weight:750}.dialogTop h2{font-size:clamp(22px,4vw,30px);letter-spacing:-.045em;line-height:1.16;margin:0}
+.closeButton{flex:none;display:grid;place-items:center;cursor:pointer;color:#d9f2ea;background:#203534;border:1px solid #34534e;width:34px;height:34px;border-radius:8px}.closeButton:hover{background:#33514c}
+.dialogIntro{color:#bed8cf;font-size:13px;line-height:1.8;margin:18px 0}
+.securityNote{display:flex;gap:12px;align-items:flex-start;border:1px solid #7e6d41;border-radius:10px;background:#332c1c;padding:15px;color:#f8e6b5}.securityNote svg{flex-shrink:0;margin-top:2px}.securityNote p{margin:0;line-height:1.7;font-size:12px}
+.guideSection{padding:23px 0 17px;border-bottom:1px solid #344c49}.guideLabel{font-size:10px;letter-spacing:.15em;color:#a1d7c5;font-weight:800}.guideSection h3{font-size:17px;margin:11px 0 15px;letter-spacing:-.02em}.guideSection ol{padding-left:22px;display:grid;gap:10px;margin:0;color:#c9e3da;font-size:13px;line-height:1.7}.guideSection li{padding-left:3px}.guideSection li::marker{color:#9fd9c7}.helpDialog a,.footer a{color:#b6f2dc;text-decoration:underline;text-underline-offset:3px}
+.dialogEnd{color:#a7c8bd;font-size:12px;line-height:1.75;margin:21px 0}.dialogDone{display:block;margin-left:auto;padding:11px 20px;border:0;border-radius:9px;background:#b5f0d8;color:#12332c;font-weight:750;cursor:pointer;font:inherit}
+@media(max-width:620px){.helpPanel{align-items:flex-start;flex-wrap:wrap}.helpSymbol{display:none}.helpTrigger{width:100%;justify-content:center}.dialogInner{padding:22px 17px}.guideSection ol{font-size:12px}}
+:global(:root[data-theme="light"]) .helpPanel{background:#e6f0e9;border-color:#c3d9cc}
+:global(:root[data-theme="light"]) .helpSymbol{color:#245747;background:#d6e6dc;border-color:#bdd5c5}
+:global(:root[data-theme="light"]) .helpCopy p{color:#476a59}
+:global(:root[data-theme="light"]) .helpTrigger{color:#175d48;border-color:#55997e}
+:global(:root[data-theme="light"]) .helpTrigger:hover{background:#d4e6dc}
+:global(:root[data-theme="light"]) .helpDialog{background:#f7fbf7;color:#182e24;border-color:#b9d3c6}
+:global(:root[data-theme="light"]) .dialogKicker,:global(:root[data-theme="light"]) .guideLabel{color:#256c53}
+:global(:root[data-theme="light"]) .closeButton{background:#e5f0e9;border-color:#bcd2c4;color:#1d4636}
+:global(:root[data-theme="light"]) .dialogIntro,:global(:root[data-theme="light"]) .guideSection ol,:global(:root[data-theme="light"]) .dialogEnd{color:#446a5b}
+:global(:root[data-theme="light"]) .securityNote{color:#714b0d;background:#fff4db;border-color:#dabb7c}
+:global(:root[data-theme="light"]) .guideSection{border-color:#d2e4d7}
+:global(:root[data-theme="light"]) .helpDialog a,:global(:root[data-theme="light"]) .footer a{color:#176b4f}
