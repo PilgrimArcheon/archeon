@@ -1,18 +1,19 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import Image from "next/image";
 import {
   ArrowLeft,
   ArrowRight,
-  FileText,
   LockKeyhole,
   Plus,
   Sparkles,
 } from "lucide-react";
 import { archeonApps } from "@/features/apps/registry";
 import styles from "./apps.module.css";
+import { RequestAppButton } from "@/components/archeon/RequestAppButton";
 
 export const metadata: Metadata = {
-  title: "Apps | Archeon",
+  title: "Apps",
   description: "An evolving collection of tools built by Archeon.",
 };
 
@@ -68,7 +69,7 @@ export default function AppsHub() {
               <Link href={app.href} className={styles.appCard} key={app.slug}>
                 <div className={styles.cardHeader}>
                   <span className={styles.cardIcon}>
-                    <FileText size={23} strokeWidth={1.7} />
+                    {app.slug === "tackboard" ? <Image src="/images/tackboard-icon.png" width={38} height={38} alt="" /> : <Image src="/images/invoice-studio-icon.svg" width={38} height={38} alt="" /> }
                   </span>
                   <span className={styles.cardArrow}>
                     <ArrowRight size={18} />
@@ -99,13 +100,14 @@ export default function AppsHub() {
                 More tools will live here as we build them, with their own
                 routes under /app.
               </p>
+              <RequestAppButton/>
               <span className={styles.comingTag}>MORE TO COME</span>
             </div>
           </div>
         </section>
         <footer className={styles.footer}>
           <span>© {new Date().getFullYear()} ARCHEON</span>
-          <span>Made to keep things moving.</span>
+          <Link href="/app/support">FAQs & Support</Link>
         </footer>
       </div>
     </div>

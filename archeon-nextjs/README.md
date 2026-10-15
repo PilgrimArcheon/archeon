@@ -42,3 +42,14 @@ Copy `.env.example` to `.env.local` and supply Neon + authentication values for 
 ## Updates
 
 Push a feature branch, review the Vercel Preview deployment, then merge to `main` to automatically deploy. See the deployment guide.
+
+## Unified Archeon Apps (October 2026)
+
+- Shared `/app/auth/sign-in` handles all website products and applications.
+- `/app/support` provides FAQs and the private Neon feedback inbox.
+- `/app/admin` is a private, allowlisted, password-reauthenticated admin area.
+- `scripts/archeon-feedback-admin.sql` is an **additive** migration required before support submissions and admin inbox statistics work.
+- The standalone Electron app lives in its **own project**. It connects to TackBoard through the existing scoped pairing and Neon sync API.
+- Web and desktop app release code are provided separately to avoid committing Electron runtimes to the Next.js repository.
+
+Read `RELEASE-GUIDE.md` for the migration order, configuration, smoke tests, and what remains to verify before public installers.

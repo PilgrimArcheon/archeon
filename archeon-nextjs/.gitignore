@@ -20,3 +20,9 @@ _legacy-auth-backup/
 *.bak
 APPLY-FIX.ps1
 FIXED-FILES.json
+
+# Local preview artifacts and temporary exports
+*-preview.png
+*.bak
+*.zip
+*.tsbuildinfo

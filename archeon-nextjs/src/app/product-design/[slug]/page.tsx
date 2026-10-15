@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const project = getProductDesignProject(slug);
   if (!project) return { title: "Product not found" };
-  return { title: `${project.title} — Product Design`, description: project.summary, ...(project.cover ? { openGraph: { images: [project.cover] } } : {}) };
+  return { title: `${project.title}`, description: project.summary, ...(project.cover ? { openGraph: { images: [project.cover] } } : {}) };
 }
 
 export default async function ProductCaseStudy({ params }: Props) {

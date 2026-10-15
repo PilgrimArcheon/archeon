@@ -19,7 +19,7 @@ const siteUrl =
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Archeon Creative technologist & builder",
+    default: "archeon",
     template: "%s | archeon",
   },
   description: `${site.name} (${site.nickname}) — building software, digital tools, interactive experiences, games, and design.`,

@@ -141,11 +141,6 @@ function Empty({
 }
 function InvoiceDashboard() {
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [authMode, setAuthMode] = useState<"register" | "login">("register");
-  const [showPassword, setShowPassword] = useState(false);
   const [accountEmail, setAccountEmail] = useState("");
   const [hasGuestDraft, setHasGuestDraft] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -304,44 +299,6 @@ function InvoiceDashboard() {
     };
   }, [refresh]);
 
-  async function submitAccount() {
-    if (!email.trim() || !password) return;
-    if (authMode === "register" && password !== confirmPassword) {
-      warn("The two passwords don't match.");
-      return;
-    }
-    setBusy("login");
-    try {
-      const response = await fetch(`/api/auth/${authMode}`, {
-        method: "POST",
-        credentials: "same-origin",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.error || "Unable to access your account.");
-      setPassword("");
-      setConfirmPassword("");
-      await refresh();
-      setSignedIn(true);
-      // Restore the guest's work if they choose to register or sign in.
-      try {
-        const saved = sessionStorage.getItem("archeon_invoice_guest_draft");
-        const sender = sessionStorage.getItem("archeon_invoice_guest_company");
-        if (saved) {
-          if (sender) setCompany(JSON.parse(sender) as Company);
-          setEditing(JSON.parse(saved) as Invoice);
-          sessionStorage.removeItem("archeon_invoice_guest_draft");
-          sessionStorage.removeItem("archeon_invoice_guest_company");
-        }
-      } catch { /* storage may be blocked */ }
-      notify(authMode === "register" ? "Your account is ready." : "Welcome back.");
-    } catch (e) {
-      warn((e as Error).message);
-    } finally {
-      setBusy("");
-    }
-  }
   async function logout() {
     try {
       await fetch("/api/auth/session", {
@@ -738,8 +695,8 @@ function InvoiceDashboard() {
       <div className="guest-workspace">
         <div className="guest-topbar">
           <a href="/app" className="invoice-wordmark">
-            archeon<span>.</span>
-            <small> / INVOICE STUDIO</small>
+            <img src="/images/invoice-studio-icon.svg" width="30" height="30" alt="" />
+            <strong>Invoice Studio</strong>
           </a>
           <div>
             <span className="guest-mode-label">
@@ -806,8 +763,8 @@ function InvoiceDashboard() {
             className="invoice-wordmark"
             aria-label="Archeon apps homepage"
           >
-            archeon<span>.</span>
-            <small> / INVOICE STUDIO</small>
+            <img src="/images/invoice-studio-icon.svg" width="30" height="30" alt="" />
+            <strong>Invoice Studio</strong>
           </a>
           <div className="login-header-actions">
             {themeButton}
@@ -889,79 +846,8 @@ function InvoiceDashboard() {
             <div className="guest-login-divider">
               <span>OR SAVE YOUR WORK WITH A FREE ACCOUNT</span>
             </div>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                void submitAccount();
-              }}
-            >
-              <Field title="Email address">
-                <input
-                  type="email"
-                  autoComplete="email"
-                  required
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </Field>
-              <Field title="Password">
-                <div className="account-password-wrap">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    autoComplete={authMode === "register" ? "new-password" : "current-password"}
-                    required
-                    minLength={authMode === "register" ? 12 : undefined}
-                    maxLength={128}
-                    placeholder={authMode === "register" ? "At least 12 characters" : "Enter your password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                  <button className="account-password-show" type="button" onClick={() => setShowPassword((v) => !v)}>
-                    {showPassword ? "Hide" : "Show"}
-                  </button>
-                </div>
-              </Field>
-              {authMode === "register" && (
-                <Field title="Confirm password">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    autoComplete="new-password"
-                    required
-                    minLength={12}
-                    maxLength={128}
-                    placeholder="Repeat your password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                  />
-                </Field>
-              )}
-              {error && (
-                <div className="login-error" role="alert">
-                  {error}
-                </div>
-              )}
-              <button
-                disabled={busy !== ""}
-                className="btn btn-muted btn-wide"
-                type="submit"
-              >
-                {busy === "login" ? (
-                  <Spinner />
-                ) : (
-                  <>
-                    {authMode === "register" ? "Create free account" : "Sign in"} <ArrowRight size={16} />
-                  </>
-                )}
-              </button>
-            </form>
-            <button
-              className="invoice-auth-switch"
-              type="button"
-              onClick={() => { setAuthMode(authMode === "register" ? "login" : "register"); setError(""); setPassword(""); setConfirmPassword(""); }}
-            >
-              {authMode === "register" ? "Already have an account? Sign in" : "New here? Create a free account"}
-            </button>
+            <a href="/app/auth/sign-in?mode=register&next=%2Fapp%2Finvoice" className="btn btn-primary btn-wide invoice-shared-auth">Create an Archeon account <ArrowRight size={16}/></a>
+            <a href="/app/auth/sign-in?mode=login&next=%2Fapp%2Finvoice" className="btn btn-outline btn-wide invoice-shared-auth">Sign in to my account <ArrowRight size={16}/></a>
             <div className="login-foot">
               <ShieldCheck size={15} /> Each account has its own private workspace.
               Email verification and password recovery are not available yet.
@@ -970,7 +856,7 @@ function InvoiceDashboard() {
         </div>
         <footer className="login-attribution">
           <span>© {new Date().getFullYear()} ARCHEON</span>
-          <span>MADE TO KEEP THINGS MOVING.</span>
+          <span>Invoice Studio · Built by archeon.</span>
         </footer>
       </div>
     );
@@ -989,17 +875,15 @@ function InvoiceDashboard() {
     <div className="shell">
       <aside className={`sidebar ${mobileNav ? "sidebar-open" : ""}`}>
         <div className="brand">
-          <span className="brand-mark">
-            a<span>.</span>
-          </span>
+          <span className="brand-mark"><img src="/images/invoice-studio-icon.svg" alt="" width="33" height="33" /></span>
           <div>
-            archeon<span className="light-brand"> / invoice</span>
-            <small>THE CREATIVE TOOLBOX / 001</small>
+            <strong>Invoice Studio</strong>
+            <small>BUILT BY ARCHEON</small>
           </div>
         </div>
         <a href="/app" className="apps-back-link">
           <ArrowLeft size={15} /> All apps
-        </a>
+        </a><a href="/app/support?source=invoice" className="apps-back-link"><FileText size={15}/> Invoice support</a>
         <div className="sidebar-label">WORKSPACE</div>
         <nav>
           {(
@@ -1467,7 +1351,7 @@ function InvoiceDashboard() {
             </>
           )}
           <div className="page-foot">
-            © {new Date().getFullYear()} Archeon Invoice Studio <span>•</span> Made for everyday business.
+            © {new Date().getFullYear()} Invoice Studio <span>•</span> Built by archeon. <span>•</span> <a href="/app/support?source=invoice">Support</a>
           </div>
         </div>
       </div>

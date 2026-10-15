@@ -97,3 +97,10 @@ html { scroll-padding-top: 4rem; }
 @media screen and (min-width: 576px) { .original-site .work__card img { width: 295px; } }
 .original-site .skills__check { color: var(--first-color); flex-shrink: 0; margin-top: .1rem; }
 .original-site .contact__card-icon, .original-site .about__icon { display: inline-block; }
+
+/* Shared Archeon page primitives used by support, admin and new tools. */
+:root{--archeon-page:#0e1010;--archeon-panel:#191d1b;--archeon-ink:#e9edea;--archeon-muted:#a6aca7;--archeon-line:#353a37;--archeon-field:#111714;--archeon-action:#e2eae2;--archeon-action-ink:#17241b}
+:root[data-theme="light"]{--archeon-page:#f6f7f3;--archeon-panel:#fffefa;--archeon-ink:#19241e;--archeon-muted:#66756a;--archeon-line:#d9dfd7;--archeon-field:#fbfcf7;--archeon-action:#233a2c;--archeon-action-ink:#f8fbf5}
+
+.archeon-global-theme{position:fixed;right:18px;top:18px;z-index:90;width:39px;height:39px;display:grid;place-items:center;background:var(--archeon-panel);color:var(--archeon-ink);border:1px solid var(--archeon-line);border-radius:10px;box-shadow:0 5px 18px rgba(0,0,0,.16);cursor:pointer}
+.archeon-global-theme:focus-visible{outline:2px solid #70b99d;outline-offset:3px}

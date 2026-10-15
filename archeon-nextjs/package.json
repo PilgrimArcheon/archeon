@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "preflight": "node scripts/check-deploy-files.mjs",
     "verify:invoice-receipts": "node scripts/verify-invoice-receipts.cjs",
-    "verify:invoice-gmail": "node scripts/verify-invoice-gmail.cjs"
+    "verify:invoice-gmail": "node scripts/verify-invoice-gmail.cjs",
+    "verify:release": "node scripts/verify-archeon-release.cjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.0",

@@ -53,7 +53,8 @@ export function useTackCloud() {
   };
   const setTheme = useCallback((value: "light" | "dark") => {
     setThemeState(value);
-    try { localStorage.setItem("archeon-app-theme", value); } catch { /* private mode */ }
+    document.documentElement.dataset.theme = value;
+    try { localStorage.setItem("archeon-theme", value); } catch { /* private mode */ }
   }, []);
   const persist = useCallback(() => {
     const next = content.current;
@@ -180,8 +181,7 @@ export function useTackCloud() {
   useEffect(() => {
     let active = true;
     try {
-      const appTheme = localStorage.getItem("archeon-app-theme");
-      setThemeState(appTheme === "light" || appTheme === "dark" ? appTheme : (document.documentElement.dataset.theme === "light" ? "light" : "dark"));
+      setThemeState(document.documentElement.dataset.theme === "light" ? "light" : "dark");
     } catch { /* storage optional */ }
     void (async () => {
       let guest: TackboardData = initialData();

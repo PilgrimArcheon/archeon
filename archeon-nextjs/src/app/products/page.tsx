@@ -6,7 +6,7 @@ import { ProductPreview } from "@/components/products/ProductPreview";
 import styles from "./products.module.css";
 
 export const metadata: Metadata = {
-  title: "Products — Archeon",
+  title: "Products",
   description: "Pocketline, Tackboard and Gatherly: three digital products for money, productivity and community. Browse design previews and user journeys.",
 };
 

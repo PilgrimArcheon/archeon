@@ -3,7 +3,7 @@ import Link from "next/link";
 import styles from "./desktop.module.css";
 
 export const metadata: Metadata = {
-  title: "TackBoard Desktop — Windows & Mac | Archeon",
+  title: "TackBoard Desktop",
   description: "Small floating desktop sticky notes. Download TackBoard for Windows or Mac and sync with your Archeon account.",
 };
 
@@ -41,7 +41,7 @@ export default function DesktopPage() {
         <ol>
           <li><span>01</span><div><strong>Install and open TackBoard</strong><p>On Windows, run the installer. On Mac, open the DMG and drag TackBoard to Applications. macOS may ask you to approve the app if the build is not signed/notarized.</p></div></li>
           <li><span>02</span><div><strong>Pair your Archeon account</strong><p>Sign in to the web app, open <b>Desktop companion</b> and generate a pairing key. In the desktop app, click the gear icon and paste the key into <b>Account & cloud</b>.</p></div></li>
-          <li><span>03</span><div><strong>Choose a board and a note size</strong><p>Select your board on the desktop home screen. Choose Small, Medium or Large in Settings. Notes sync automatically while the app runs in the tray or menu bar.</p></div></li>
+          <li><span>03</span><div><strong>Choose a board and a note size</strong><p>Select your board on the desktop home screen. Choose Small, Medium or Large in Settings. You can create or rename a board from the desktop board dropdown. Notes sync automatically while the app runs in the tray or menu bar.</p></div></li>
         </ol>
         <Link className={styles.web} href="/app/tackboard">Open my web board ↗</Link>
       </section>
