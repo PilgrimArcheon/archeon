@@ -14,3 +14,6 @@
 :global(:root[data-theme="light"]) .option p,:global(:root[data-theme="light"]) .option small,:global(:root[data-theme="light"]) .notice,:global(:root[data-theme="light"]) .footer{color:#5a7c6c}
 :global(:root[data-theme="light"]) .pending{background:#e4ebe3;color:#365e4d}
 :global(:root[data-theme="light"]) .web{color:#1f6a55}
+
+.notice a{color:#b8efe0;text-underline-offset:3px}
+:global(:root[data-theme="light"]) .notice a{color:#226a56}
