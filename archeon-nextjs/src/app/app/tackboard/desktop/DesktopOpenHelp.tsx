@@ -73,7 +73,7 @@ export function DesktopOpenHelp() {
             <div className={styles.guideLabel}>01 / WINDOWS 10 &amp; 11</div>
             <h3 id="windows-guide-heading">Windows protected your PC</h3>
             <ol>
-              <li>Confirm you downloaded the <strong>.exe</strong> installer from our official GitHub release.</li>
+              <li>Confirm you downloaded the <strong>.exe</strong> installer from our official release page.</li>
               <li>If a Microsoft Defender SmartScreen window appears, select <strong>More info</strong>.</li>
               <li>If <strong>Run anyway</strong> appears and you trust the file, choose it to continue the installation.</li>
               <li>If Windows or your security software blocks it as malicious, do not override that warning; <Link href="/app/support?source=tackboard">contact support</Link>.</li>
