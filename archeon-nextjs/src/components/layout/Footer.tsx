@@ -20,9 +20,6 @@ export function Footer() {
         <li><Link className="footer__link" href="/projects">Projects</Link></li>
         <li><Link className="footer__link" href="/app">Apps</Link></li>
         <li><Link className="footer__link" href="/contact">Contact</Link></li>
-        <li><Link className="footer__link" href="/app/support">Support & FAQs</Link></li>
-        <li><Link className="footer__link" href="/app/privacy">Privacy Policy</Link></li>
-        <li><Link className="footer__link" href="/app/terms">Terms of Use</Link></li>
       </ul>
       <ul className="footer__social">
         <li><a className="footer__social-link" href={site.socials.messenger} target="_blank" rel="noopener noreferrer" aria-label="Messenger"><MessageCircle size={18} aria-hidden /></a></li>

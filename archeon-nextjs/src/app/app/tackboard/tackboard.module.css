@@ -278,8 +278,8 @@
 .peelFlight .peelBadge{z-index:5;animation:tackboardStamp 1.75s ease-in-out both}
 @keyframes tackboardStamp{0%,12%{opacity:0;transform:translate(-50%,-45%) rotate(6deg) scale(.85)}25%,72%{opacity:1;transform:translate(-50%,-50%) rotate(6deg) scale(1)}100%{opacity:0;transform:translate(-50%,-70%) rotate(9deg)}}
 
-/* Adaptive canvas: the visible board sets its minimum extent, not a fixed giant paper sheet.
-   Its action lives outside the scrolling viewport and stays reachable at every zoom/size. */
+/* Adaptive canvas: dotted paper fills the whole editable viewport, then grows
+   with distant notes. New Note remains in the fixed canvas toolbar. */
 
 .boardViewport{
   display:flex;
@@ -289,7 +289,9 @@
 }
 .boardCanvas{
   flex:0 0 auto;
-  min-width:0;
+  box-sizing:border-box;
+  min-width:100%;
+  min-height:100%;
   border:1px solid #e1e4d9;
   border-radius:6px;
   box-shadow:0 7px 30px #1721190b;

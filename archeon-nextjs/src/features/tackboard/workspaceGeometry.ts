@@ -6,9 +6,9 @@ export type PinboardNoteBounds = PinboardPoint & { width?: number; height?: numb
 export const PINBOARD_INSET = 18;
 
 /**
- * Fit the canvas to its viewport and the furthest visible note.
- * Keep a compact paper surface centered inside the viewport. Only grow to
- * accommodate the visible notes, with a small margin around them.
+ * Fill the entire available editing viewport first. Only grow past that area
+ * to contain notes placed farther right or lower down, with a tight margin.
+ * The fallback is used only before ResizeObserver measures the viewport.
  */
 export const PINBOARD_MARGIN = 36;
 export function workspaceDimensions(
@@ -18,11 +18,11 @@ export function workspaceDimensions(
   const noteRight = notes.reduce((max, note) => Math.max(max, Math.max(0, Number.isFinite(note.x) ? note.x : 0) + (note.width ?? 247)), 0);
   const noteBottom = notes.reduce((max, note) => Math.max(max, Math.max(0, Number.isFinite(note.y) ? note.y : 0) + (note.height ?? 265)), 0);
   const extra = notes.length ? PINBOARD_MARGIN : 0;
-  const preferredWidth = Math.min(560, viewport.width || 560);
-  const preferredHeight = Math.min(410, viewport.height || 410);
+  const visibleWidth = viewport.width > 0 ? viewport.width : 560;
+  const visibleHeight = viewport.height > 0 ? viewport.height : 410;
   return {
-    width: Math.ceil(Math.max(280, preferredWidth, noteRight + extra)),
-    height: Math.ceil(Math.max(300, preferredHeight, noteBottom + extra)),
+    width: Math.ceil(Math.max(280, visibleWidth, noteRight + extra)),
+    height: Math.ceil(Math.max(300, visibleHeight, noteBottom + extra)),
   };
 }
 
