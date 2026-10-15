@@ -1021,7 +1021,6 @@ function InvoiceDashboard() {
                     <div>
                       <div className="eyebrow">
                         INVOICE STUDIO / OVERVIEW{" "}
-                        <span className="sparkle">✳</span>
                       </div>
                       <h1>
                         Your work, at a glance
