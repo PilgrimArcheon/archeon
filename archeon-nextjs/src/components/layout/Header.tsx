@@ -32,7 +32,11 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    setTheme(document.documentElement.dataset.theme === "light" ? "light" : "dark");
+    const syncTheme = () => setTheme(document.documentElement.dataset.theme === "light" ? "light" : "dark");
+    syncTheme();
+    const observer = new MutationObserver(syncTheme);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
@@ -63,7 +67,7 @@ export function Header() {
       <nav className="nav container" aria-label="Site header">
         <Link href="/" className="nav__logo">archeon</Link>
         <button id="theme-button" className="change-theme" type="button" onClick={toggleTheme} aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`} title="Switch color theme">
-          {theme === "dark" ? <Moon size={20} strokeWidth={1.8} /> : <Sun size={20} strokeWidth={1.8} />}
+          {theme === "dark" ? <Sun size={20} strokeWidth={1.8} /> : <Moon size={20} strokeWidth={1.8} />}
         </button>
       </nav>
     </header>

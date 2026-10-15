@@ -7,4 +7,4 @@
 
 /* Keep the apps directory monochrome, including the idea-request surface. */
 .cardBottom{justify-content:flex-start}
-.header{justify-content:flex-start}
+.header{justify-content:space-between}

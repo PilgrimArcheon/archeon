@@ -865,3 +865,37 @@
 .invoice-app .hero-copy h2{color:#f8fbfe!important}
 .invoice-app .content{background-image:radial-gradient(circle,#2647660c .7px,transparent .9px);background-size:24px 24px}
 :root[data-theme="dark"] .invoice-app .content{background-image:radial-gradient(circle,#9fb9d410 .7px,transparent .9px);background-size:24px 24px}
+
+/* v0.7 Midnight Ink: nearly black navy paper surfaces for dark mode only.
+   The light paper theme and customer-facing PDF appearance stay unchanged. */
+:root[data-theme="dark"] .invoice-app {
+  --invoice-bg:#080d14; --invoice-panel:#0e1620; --invoice-raised:#162230;
+  --invoice-soft:#1a2b3b; --invoice-border:#273544;
+  --invoice-text:#edf3f9; --invoice-muted:#a6b8ca; --invoice-subtle:#8498ad;
+  --invoice-contrast:#09121d; --invoice-accent:#d9e9f4;
+  --invoice-dot:rgba(189,213,239,.055);
+  --page:var(--invoice-bg); --ink:var(--invoice-text); --muted:var(--invoice-muted);
+  --line:var(--invoice-border); --card:var(--invoice-panel); --indigo:var(--invoice-accent);
+  background-color:var(--invoice-bg); color:var(--invoice-text);
+}
+:root[data-theme="dark"] .invoice-app :is(.shell,.guest-workspace,.main-column) {
+  background-color:var(--invoice-bg); color:var(--invoice-text);
+}
+:root[data-theme="dark"] .invoice-app .sidebar {background:#0b131e;color:var(--invoice-muted);border-color:var(--invoice-border)}
+:root[data-theme="dark"] .invoice-app .sidebar :is(.nav-link:hover,.apps-back-link:hover) {background:#162638;color:#f3f7fc}
+:root[data-theme="dark"] .invoice-app .sidebar .nav-link.selected {background:#20364a;color:#f5f9fd;box-shadow:inset 3px 0 0 #b5d5e7}
+:root[data-theme="dark"] .invoice-app .sidebar-tip {background:#142231;border-color:#293e53}
+:root[data-theme="dark"] .invoice-app .sidebar-tip button {background:#2c4b65;color:#f0f7fc}
+:root[data-theme="dark"] .invoice-app .topbar {background:#0c1520;color:var(--invoice-text);border-color:var(--invoice-border)}
+:root[data-theme="dark"] .invoice-app :is(.metric-card,.form-card,.list-container,.appearance-editor,.guest-banner,.login-card,.table-scroll,.tracking-toolbar,.item-block,.empty) {
+  background:#111c29;color:var(--invoice-text);border-color:var(--invoice-border);box-shadow:none;
+}
+:root[data-theme="dark"] .invoice-app :is(.invoice-table thead,.invoice-table tbody tr,.invoice-table td,.list-toolbar) {background:#111c29;color:var(--invoice-text);border-color:var(--invoice-border)}
+:root[data-theme="dark"] .invoice-app :is(.btn-outline,.btn-muted,.btn-white) {background:#192a3b;color:#e4eff8;border-color:#31485d}
+:root[data-theme="dark"] .invoice-app :is(.form-card input,.form-card select,.form-card textarea,.login-card input,.login-card select,.login-card textarea,.tracking-dialog input) {
+  background:#0b1623;color:#eaf2fb;border-color:#30465a;
+}
+:root[data-theme="dark"] .invoice-app .hero-panel {background:#101f30;border-color:#293e53}
+:root[data-theme="dark"] .invoice-app .hero-panel::before {background:radial-gradient(circle at 90% 0%,#4266882e,transparent 46%),linear-gradient(106deg,#0e1b2b,#152b40)}
+:root[data-theme="dark"] .invoice-app .content {background-image:radial-gradient(circle,#a7c8e013 .7px,transparent .95px);background-size:24px 24px}
+:root[data-theme="dark"] .invoice-app .login-scene {background:radial-gradient(circle at 80% 5%,#2947642b 0,transparent 46%),linear-gradient(130deg,#080d14,#101b28)}

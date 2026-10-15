@@ -128,3 +128,11 @@ html { scroll-padding-top: 4rem; }
   --archeon-action-ink:#fafafa;
   --archeon-dots:#00000012;
 }
+
+/* App directory: place the shared appearance control beside the wordmark,
+   never detached in a screen corner or duplicated by SiteShell. */
+.archeon-global-theme.archeon-inline-theme {
+  position:static; z-index:auto; flex:0 0 auto; width:38px; height:38px;
+  box-shadow:none; border-radius:9px; margin:0;
+}
+.archeon-inline-theme:hover { background:var(--archeon-field); }

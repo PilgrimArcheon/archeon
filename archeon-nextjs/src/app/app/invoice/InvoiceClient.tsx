@@ -973,9 +973,7 @@ function InvoiceDashboard() {
                 year: "numeric",
               })}
             </div>
-            <div className="tiny-avatar">
-              {company.businessName.charAt(0).toUpperCase()}
-            </div>
+
           </div>
         </header>
         <div className="content">
@@ -1063,12 +1061,7 @@ function InvoiceDashboard() {
                         >
                           <FilePlus2 size={17} /> Create an invoice
                         </button>
-                        <button
-                          className="btn btn-ghost-white"
-                          onClick={() => startInvoice(true)}
-                        >
-                          Try sample <ArrowRight size={15} />
-                        </button>
+
                       </div>
                     </div>
                     <div className="hero-paper">

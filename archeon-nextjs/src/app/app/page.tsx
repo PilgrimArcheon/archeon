@@ -9,6 +9,7 @@ import {
 import { archeonApps } from "@/features/apps/registry";
 import styles from "./apps.module.css";
 import { RequestAppButton } from "@/components/archeon/RequestAppButton";
+import { GlobalThemeControl } from "@/components/theme/GlobalThemeControl";
 
 export const metadata: Metadata = {
   title: "Apps",
@@ -23,6 +24,7 @@ export default function AppsHub() {
           <Link href="/" className={styles.logo} aria-label="Archeon homepage">
             archeon<span>.</span>
           </Link>
+          <GlobalThemeControl inline />
         </header>
 
         <section className={styles.hero}>

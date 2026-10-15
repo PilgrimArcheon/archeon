@@ -12,7 +12,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
   const isApp = pathname === "/app" || pathname.startsWith("/app/");
 
   if (isApp) {
-    const hasOwnTheme = pathname === "/app/tackboard" || pathname === "/app/invoice";
+    const hasOwnTheme = pathname === "/app" || pathname === "/app/tackboard" || pathname === "/app/invoice";
     return <><main id="main-content">{children}</main>{!hasOwnTheme && <GlobalThemeControl/>}</>;
   }
 
