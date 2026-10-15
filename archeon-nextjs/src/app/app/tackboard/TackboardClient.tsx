@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import {
   ArrowDownToLine, ArrowLeft, Archive, ArrowUpRight, Check, CheckCheck, ChevronDown, CircleHelp, Cloud, CloudOff, Monitor, Moon, Sun, Link2, Copy, RefreshCw,
-  ClipboardList, Grip, Menu, MoreHorizontal, Pencil, Pin, Plus, RotateCcw,
+  ClipboardList, Grip, Menu, MoreHorizontal, Pencil, Pin, Plus, RotateCcw, Clock3,
   Search, Share2, Trash2, X,
 } from "lucide-react";
 import {
@@ -32,6 +32,8 @@ export default function TackboardClient() {
   const { data, ready, accountEmail, accountId, status: syncStatus, message: syncMessage,
     setMessage: setSyncMessage, conflict: syncConflict, chooseConflict, hasGuestNotes,
     importGuest, edit: mutate, replaceData, syncNow, saveNow, cloudRevision, lastSavedAt, signOut, theme, setTheme } = useTackCloud();
+  const [headerDate, setHeaderDate] = useState("");
+  useEffect(() => { setHeaderDate(new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })); }, []);
   const [pairToken, setPairToken] = useState("");
   const [pairedDevices, setPairedDevices] = useState<{id:string;label:string}[]>([]);
   const [showDevices, setShowDevices] = useState(false);
@@ -309,6 +311,7 @@ export default function TackboardClient() {
       <div className={styles.sidebarActions}>
         <button className={showArchive ? styles.activeAction : ""} onClick={() => { setShowArchive(v => !v); setMobileNav(false); }}><Archive size={17}/> Completed notes <span>{archivedNotes.length}</span></button>
         <button onClick={() => setDialog("help")}><CircleHelp size={17}/> How it works</button>
+        <Link href="/app/support?source=tackboard" className={styles.supportLink}><CircleHelp size={17}/> TackBoard support</Link>
       </div>
       <div className={styles.sidebarBottom}>
         <div className={styles.cloudSummary} role="status">
@@ -349,7 +352,12 @@ export default function TackboardClient() {
     <main className={styles.main}>
       <header className={styles.topbar}>
         <div className={styles.breadcrumb}><button className={styles.menuButton} onClick={() => setMobileNav(true)} aria-label="Open board menu"><Menu size={20}/></button><span>MY WORKSPACE</span><span className={styles.chevron}>/</span><strong>{board?.name ?? "Board"}</strong></div>
-        <div className={styles.topActions}><button className={styles.themeSwitch} onClick={() => setTheme(theme === "dark" ? "light" : "dark")} title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`} aria-label="Toggle TackBoard color theme">{theme === "dark" ? <Sun size={17}/> : <Moon size={17}/>}<span>{theme === "dark" ? "LIGHT" : "DARK"}</span></button><span className={styles.syncState} aria-label={syncStatus === "offline" ? "Offline, edits stored locally" : syncStatus === "conflict" ? "Sync conflict needs attention" : accountId ? "Cloud backup enabled" : "Saved on this device"} title={syncStatus === "offline" ? "Offline — edits are safe on this device and will retry" : syncStatus === "conflict" ? "Resolve the cloud conflict below" : accountId ? "Cloud backup runs automatically" : "Local-only board"}>{syncStatus === "offline" || syncStatus === "conflict" ? <CloudOff size={15}/> : accountId ? <Cloud size={15}/> : <Monitor size={15}/>} {syncStatus === "offline" ? "OFFLINE" : syncStatus === "conflict" ? "ACTION NEEDED" : accountId ? "CLOUD" : "LOCAL"}</span><span className={styles.privateLabel}><span className={styles.greenDot}/> PERSONAL BOARD</span><button className={styles.topHelp} onClick={() => setDialog("help")} aria-label="About Tackboard"><CircleHelp size={18}/></button><Link href="/app/support?source=tackboard" title="TackBoard support" aria-label="TackBoard support"><CircleHelp size={17}/> Support</Link><Link className={styles.topBack} href="/app"><ArrowUpRight size={17}/> Archeon Apps</Link></div>
+        <div className={styles.topActions}>
+          <button className={styles.themeSwitch} onClick={() => setTheme(theme === "dark" ? "light" : "dark")} title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`} aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}>
+            {theme === "dark" ? <Sun size={17}/> : <Moon size={17}/>}
+          </button>
+          <span className={styles.dateChip}><Clock3 size={15}/>{headerDate || "Today"}</span>
+        </div>
       </header>
       <div className={styles.workspace}>
         <div className={styles.headingRow}><div><div className={styles.eyebrow}><span className={styles.greenDot}/> YOUR SPACE TO THINK CLEARLY</div><h1>{showArchive ? "Off the board." : board?.name ?? "Your board"}<span className={styles.headingPeriod}>.</span></h1><p>{showArchive ? "Finished notes stay here until you choose to restore or delete them." : "Make a note. Make some progress. Peel it away."}</p></div><div className={styles.headingActions}>{accountId && <button className={styles.secondaryButton} disabled={manualBusy || syncStatus === "conflict"} onClick={() => void runManualSync(true)}><Cloud size={15}/> {manualBusy ? "Saving…" : syncStatus === "synced" ? "Saved" : "Save to cloud"}</button>}{!showArchive && <button className={styles.primaryButton} onClick={startNote}><Plus size={17}/> New sticky note</button>}<button className={styles.iconButton} title="Rename board" aria-label="Rename board" onClick={renameBoard}><Pencil size={17}/></button><button className={styles.iconButton} title="Delete board" aria-label="Delete board" onClick={deleteBoard}><Trash2 size={17}/></button></div></div>

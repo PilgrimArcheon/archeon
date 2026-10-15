@@ -104,3 +104,27 @@ html { scroll-padding-top: 4rem; }
 
 .archeon-global-theme{position:fixed;right:18px;top:18px;z-index:90;width:39px;height:39px;display:grid;place-items:center;background:var(--archeon-panel);color:var(--archeon-ink);border:1px solid var(--archeon-line);border-radius:10px;box-shadow:0 5px 18px rgba(0,0,0,.16);cursor:pointer}
 .archeon-global-theme:focus-visible{outline:2px solid #70b99d;outline-offset:3px}
+
+/* Shared portfolio and operations neutral surfaces. Individual apps may use a signature accent. */
+:root {
+  --archeon-page:#0d0d0e;
+  --archeon-panel:#161617;
+  --archeon-ink:#e7e7e9;
+  --archeon-muted:#a0a0a4;
+  --archeon-line:#303033;
+  --archeon-field:#111112;
+  --archeon-action:#e4e7e4;
+  --archeon-action-ink:#171818;
+  --archeon-dots:#ffffff14;
+}
+:root[data-theme="light"] {
+  --archeon-page:#f6f6f5;
+  --archeon-panel:#ffffff;
+  --archeon-ink:#19191b;
+  --archeon-muted:#66666a;
+  --archeon-line:#dcdcdc;
+  --archeon-field:#fbfbfb;
+  --archeon-action:#1b1b1d;
+  --archeon-action-ink:#fafafa;
+  --archeon-dots:#00000012;
+}

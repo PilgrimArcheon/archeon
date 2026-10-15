@@ -54,9 +54,6 @@ export default function ProductDesignPage() {
             <span>
               <span className="pd-pulse" /> ARCHEON / PORTFOLIO 02
             </span>
-            <Link href="/" className="pd-minilink">
-              BACK TO ARCHEON <ArrowUpRight size={14} />
-            </Link>
           </div>
           <div className="pd-hero__art" aria-hidden="true">
             <div className="pd-hero__art-circle pd-hero__art-circle--one" />
@@ -231,9 +228,6 @@ export default function ProductDesignPage() {
             </Link>
             <Link href="/gamedev" className="pd-text-link">
               Explore Game Development <ArrowUpRight size={16} />
-            </Link>
-            <Link href="/" className="pd-text-link">
-              Back to Archeon <ArrowUpRight size={16} />
             </Link>
           </div>
         </div>

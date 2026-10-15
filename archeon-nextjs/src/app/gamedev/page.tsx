@@ -62,9 +62,6 @@ export default function GameDevPage() {
             <span>
               <span className="pd-pulse" /> ARCHEON / GAME DEV
             </span>
-            <Link href="/" className="pd-minilink">
-              BACK TO ARCHEON <ArrowUpRight size={14} />
-            </Link>
           </div>
           <div className="pd-hero__art" aria-hidden="true">
             <div className="pd-hero__art-circle pd-hero__art-circle--one" />
@@ -271,9 +268,6 @@ export default function GameDevPage() {
               className="platform-button platform-button--primary"
             >
               Get in touch <ArrowUpRight size={17} />
-            </Link>
-            <Link href="/" className="pd-text-link">
-              Back to Archeon <ArrowUpRight size={16} />
             </Link>
           </div>
         </div>

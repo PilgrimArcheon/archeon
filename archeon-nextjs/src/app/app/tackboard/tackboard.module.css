@@ -154,3 +154,12 @@
 .cloudDetails{display:block;padding:2px 11px 8px;font-size:10px;line-height:1.5;color:var(--archeon-app-muted,#89958c);overflow-wrap:anywhere}
 
 .conflictDetails{font-size:11px;overflow-wrap:anywhere;opacity:.86}
+
+/* App standard: sidebar navigation; only appearance + date in the top-right. */
+.supportLink{display:flex;align-items:center;gap:11px;width:100%;min-height:39px;padding:8px 12px;border-radius:8px;text-decoration:none;font-size:12px;color:var(--archeon-app-muted,#7d867d)!important;font-weight:600}
+.supportLink:hover{background:var(--archeon-app-panel,#f4f6f2);color:var(--archeon-app-ink,#242b25)!important}
+.topActions{gap:12px!important}
+.themeSwitch{width:36px;height:36px;padding:0!important;display:grid!important;place-items:center}
+.dateChip{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-width:128px;height:36px;border:1px solid var(--archeon-app-border,#e0e3dc);border-radius:8px;padding:0 11px;background:var(--archeon-app-panel,#fafafa);color:var(--archeon-app-muted,#767d76);font-size:11px;font-weight:650;white-space:nowrap}
+.app[data-tack-theme="dark"] .dateChip{color:#bfc8bf;background:#202422;border-color:#3a403b}
+@media(max-width:560px){.dateChip{min-width:0;padding:0 8px;font-size:10px}.topbar{gap:10px}}

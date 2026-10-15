@@ -2,9 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import Image from "next/image";
 import {
-  ArrowLeft,
   ArrowRight,
-  LockKeyhole,
   Plus,
   Sparkles,
 } from "lucide-react";
@@ -24,9 +22,6 @@ export default function AppsHub() {
         <header className={styles.header}>
           <Link href="/" className={styles.logo} aria-label="Archeon homepage">
             archeon<span>.</span>
-          </Link>
-          <Link href="/" className={styles.back}>
-            <ArrowLeft size={15} /> Back to Archeon
           </Link>
         </header>
 
@@ -85,9 +80,6 @@ export default function AppsHub() {
                   <span className={styles.available}>
                     <span className={styles.liveDot} /> Available now
                   </span>
-                  <span className={styles.private}>
-                    <LockKeyhole size={13} /> {app.privacy}
-                  </span>
                 </div>
               </Link>
             ))}
@@ -107,7 +99,7 @@ export default function AppsHub() {
         </section>
         <footer className={styles.footer}>
           <span>© {new Date().getFullYear()} ARCHEON</span>
-          <Link href="/app/support">FAQs & Support</Link>
+          <Link href="/app/support?source=apps">FAQs & Support</Link>
         </footer>
       </div>
     </div>
