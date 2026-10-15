@@ -15,7 +15,7 @@
 .invoice-app button:disabled{cursor:not-allowed;opacity:.56}
 .invoice-app a{text-decoration:none}
 .invoice-app h1, .invoice-app h2, .invoice-app h3, .invoice-app p{margin-top:0}
-.invoice-app h1, .invoice-app h2, .invoice-app h3{font-family:Manrope,"DM Sans",sans-serif;letter-spacing:-.045em}
+.invoice-app h1, .invoice-app h2, .invoice-app h3{font-family:var(--font-manrope),"DM Sans",sans-serif;letter-spacing:-.045em}
 .invoice-app h1{font-size:33px;line-height:1.19;font-weight:800}
 .invoice-app h2{font-weight:800}
 .invoice-app p{line-height:1.6}
@@ -28,14 +28,14 @@
 .invoice-app .spin{animation:archeon-invoice-spin .9s linear infinite}
 @keyframes archeon-invoice-spin{to{transform:rotate(360deg)}}
 .invoice-app .loading-screen{height:100vh;display:flex;align-items:center;justify-content:center;gap:16px;color:var(--indigo)}
-.invoice-app .app-mark, .invoice-app .brand-mark{font-family:Manrope,sans-serif;background:#eef0ff;color:var(--indigo);border-radius:13px;font-size:29px;letter-spacing:-.12em;font-weight:800;display:flex;align-items:center;justify-content:center;width:43px;height:43px;line-height:1}
+.invoice-app .app-mark, .invoice-app .brand-mark{font-family:var(--font-manrope),sans-serif;background:#eef0ff;color:var(--indigo);border-radius:13px;font-size:29px;letter-spacing:-.12em;font-weight:800;display:flex;align-items:center;justify-content:center;width:43px;height:43px;line-height:1}
 .invoice-app .app-mark span, .invoice-app .brand-mark span{color:#f7a768}
 .invoice-app .login-scene{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:linear-gradient(125deg,#e9ebff 0%,#f6f7fc 45%,#e6f2f4 100%);padding:50px 22px}
 .invoice-app .login-glow{position:absolute;filter:blur(2px);width:500px;height:500px;border-radius:50%;pointer-events:none}
 .invoice-app .glow-a{top:-270px;left:-180px;background:#d0d3ff90}
 .invoice-app .glow-b{bottom:-320px;right:-160px;background:#cdebe5}
 .invoice-app .login-card{position:relative;z-index:1;width:min(100%,470px);padding:45px;background:white;box-shadow:0 28px 90px #252c5b15;border:1px solid #fff;border-radius:23px}
-.invoice-app .login-brand{display:flex;align-items:center;gap:12px;font-family:Manrope,sans-serif;font-size:18px;letter-spacing:-.06em;font-weight:800;margin-bottom:48px}
+.invoice-app .login-brand{display:flex;align-items:center;gap:12px;font-family:var(--font-manrope),sans-serif;font-size:18px;letter-spacing:-.06em;font-weight:800;margin-bottom:48px}
 .invoice-app .login-brand .brand-mark{height:40px;width:40px}
 .invoice-app .light-brand{font-weight:500;color:#969bad}
 .invoice-app .login-icon{height:44px;width:44px;background:#f1f2ff;color:var(--indigo);display:flex;align-items:center;justify-content:center;border-radius:12px;margin-bottom:20px}
@@ -83,7 +83,7 @@
 .invoice-app .link-button:hover{text-decoration:underline}
 .invoice-app .shell{min-height:100vh;display:flex}
 .invoice-app .sidebar{width:244px;flex-shrink:0;background:#161b2b;color:#bdc1d0;min-height:100vh;display:flex;flex-direction:column;padding:31px 15px 16px;position:sticky;top:0;height:100vh;z-index:40}
-.invoice-app .brand{display:flex;align-items:center;gap:12px;padding:0 11px;margin-bottom:49px;color:white;font-family:Manrope,sans-serif;font-size:17px;letter-spacing:-.07em;font-weight:800;white-space:nowrap}
+.invoice-app .brand{display:flex;align-items:center;gap:12px;padding:0 11px;margin-bottom:49px;color:white;font-family:var(--font-manrope),sans-serif;font-size:17px;letter-spacing:-.07em;font-weight:800;white-space:nowrap}
 .invoice-app .brand .brand-mark{background:#555ae8;color:white;width:39px;height:39px;letter-spacing:-.11em;border-radius:11px;flex-shrink:0}
 .invoice-app .brand .brand-mark span{color:#ffc778}
 .invoice-app .brand small{display:block;font-size:8px;letter-spacing:.18em;font-weight:700;color:#666d83;margin-top:2px}
@@ -98,7 +98,7 @@
 .invoice-app .sidebar-spacer{flex:1}
 .invoice-app .sidebar-tip{position:relative;overflow:hidden;padding:17px;border-radius:11px;background:#232943;border:1px solid #323957;margin-bottom:23px}
 .invoice-app .tip-spark{color:#f5c778;font-size:22px;margin-bottom:8px}
-.invoice-app .sidebar-tip b{font-family:Manrope,sans-serif;color:#f3f4fc;font-size:12px}
+.invoice-app .sidebar-tip b{font-family:var(--font-manrope),sans-serif;color:#f3f4fc;font-size:12px}
 .invoice-app .sidebar-tip p{font-size:10px;line-height:1.7;color:#a1aac0;margin:7px 0 14px}
 .invoice-app .sidebar-tip button{background:#444a84;color:white;font-size:11px;font-weight:700;border:0;border-radius:7px;padding:8px 10px;display:flex;align-items:center;gap:8px}
 .invoice-app .sidebar-bottom{padding:18px 5px 0;border-top:1px solid #292f43;display:flex;align-items:center;gap:10px}
@@ -159,7 +159,7 @@
 .invoice-app .metric-icon.orange{background:#fff2e5;color:#e4a65d}
 .invoice-app .metric-icon.green{background:#e9f8ef;color:#3eaa81}
 .invoice-app .metric-icon.purple{background:#f7edff;color:#a368ca}
-.invoice-app .metric-value{font-family:Manrope,sans-serif;font-size:21px;font-weight:800;letter-spacing:-.06em;margin:17px 0 10px;white-space:nowrap}
+.invoice-app .metric-value{font-family:var(--font-manrope),sans-serif;font-size:21px;font-weight:800;letter-spacing:-.06em;margin:17px 0 10px;white-space:nowrap}
 .invoice-app .metric-value small{font-size:12px;color:#a8aeb8}
 .invoice-app .metric-bottom{font-size:10px;color:#9fa6b4;display:flex;align-items:center;gap:5px}
 .invoice-app .metric-bottom svg{color:#3eaf87}
@@ -255,7 +255,7 @@
 .invoice-app .timeline-stage div{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
 .invoice-app .timeline-stage b{font-size:11px}
 .invoice-app .timeline-stage small{font-size:9.5px;color:#9da4b1}
-.invoice-app .timeline-stage strong{margin-top:5px;font-family:Manrope,sans-serif;font-size:16px;letter-spacing:-.06em}
+.invoice-app .timeline-stage strong{margin-top:5px;font-family:var(--font-manrope),sans-serif;font-size:16px;letter-spacing:-.06em}
 .invoice-app .summary-bottom{display:grid;grid-template-columns:1fr auto;gap:10px;background:#fafbfc;border-top:1px solid #f0f1f5;padding:20px 23px}
 .invoice-app .summary-bottom span{color:#939ba9;font-size:11px}
 .invoice-app .summary-bottom b{font-size:11px}
@@ -387,7 +387,7 @@
   --page: var(--invoice-bg);
   --card: var(--invoice-panel);
   --line: var(--invoice-border);
-  font-family: Manrope, ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
   background-color: var(--invoice-bg);
   background-image: radial-gradient(circle, var(--invoice-dot) .7px, transparent .95px);
   background-size: 24px 24px;
@@ -410,7 +410,7 @@
   --invoice-warning: #935d20;
   color-scheme: light;
 }
-.invoice-app h1,.invoice-app h2,.invoice-app h3 { font-family: Manrope, ui-sans-serif, system-ui, sans-serif; font-weight: 600; }
+.invoice-app h1,.invoice-app h2,.invoice-app h3 { font-family: var(--font-manrope), ui-sans-serif, system-ui, sans-serif; font-weight: 600; }
 .invoice-app h1 { letter-spacing:-.06em; }
 .invoice-app a {color:inherit}
 .invoice-app :is(button,input,select,textarea) {font-family:inherit}
@@ -763,14 +763,14 @@
 @media (max-width:800px){.invoice-app .archeon-email-grid{grid-template-columns:1fr}.invoice-app .appearance-templates{gap:5px}.invoice-app .appearance-field-grid{grid-template-columns:1fr}.invoice-app .appearance-editor summary span{display:none}}
 
 /* Archeon Apps 2026 design language: tactile paper, soft graphite and sea-glass accents. */
-.invoice-app{--indigo:#376e62;--page:#f4f2ec;--ink:#252a28;--muted:#6a736d;--line:#deddd5;--card:#fffefa;font-family:Manrope,system-ui,sans-serif}
+.invoice-app{--indigo:#376e62;--page:#f4f2ec;--ink:#252a28;--muted:#6a736d;--line:#deddd5;--card:#fffefa;font-family:var(--font-manrope),system-ui,sans-serif}
 .invoice-app .shell,.invoice-app .guest-workspace{background:#f4f2ec}
 .invoice-app :is(.form-card,.metric-card,.list-container,.appearance-editor,.guest-banner,.login-card,.table-scroll){background:#fffefa;border-color:#dddcd3;border-radius:12px;box-shadow:0 2px 3px rgba(30,44,36,.025),0 10px 35px rgba(42,54,42,.035)}
 .invoice-app .form-card{background-image:linear-gradient(180deg,rgba(255,255,255,.83),rgba(250,249,243,.8))}
 .invoice-app :is(.btn-primary,.login-scene .btn-primary){background:#263c34;color:#fff;border-color:#263c34}
 .invoice-app .login-scene{background:radial-gradient(circle at 80% 5%,#dceee4 0,transparent 46%),linear-gradient(145deg,#f3f2ec,#eaece6)}
 .invoice-app .brand-mark{background:#e8efe8;border:1px solid #d7e3d7;border-radius:12px}.invoice-app .brand-mark img{width:32px;height:32px;object-fit:contain}
-.invoice-app .invoice-wordmark{display:inline-flex;align-items:center;gap:10px;font-family:Manrope,system-ui,sans-serif;font-weight:850;color:inherit}.invoice-app .invoice-wordmark strong{font-size:15px;letter-spacing:-.04em}.invoice-app .invoice-wordmark img{flex-shrink:0}
+.invoice-app .invoice-wordmark{display:inline-flex;align-items:center;gap:10px;font-family:var(--font-manrope),system-ui,sans-serif;font-weight:850;color:inherit}.invoice-app .invoice-wordmark strong{font-size:15px;letter-spacing:-.04em}.invoice-app .invoice-wordmark img{flex-shrink:0}
 .invoice-app .invoice-shared-auth{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;text-decoration:none}
 .invoice-app .sidebar .brand{display:flex;align-items:center;gap:12px}.invoice-app .sidebar .brand strong{font-size:16px;letter-spacing:-.04em}
 :root[data-theme="dark"] .invoice-app{--page:#111715;--ink:#e6ede6;--muted:#a3b4aa;--line:#34453d;--card:#1c2521}

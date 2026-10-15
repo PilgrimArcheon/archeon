@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
 import {
   ArrowDownToLine,
@@ -695,7 +697,7 @@ function InvoiceDashboard() {
       <div className="guest-workspace">
         <div className="guest-topbar">
           <a href="/app" className="invoice-wordmark">
-            <img src="/images/invoice-studio-icon.svg" width="30" height="30" alt="" />
+            <Image src="/images/invoice-studio-icon.svg" width={30} height={30} alt="" />
             <strong>Invoice Studio</strong>
           </a>
           <div>
@@ -763,7 +765,7 @@ function InvoiceDashboard() {
             className="invoice-wordmark"
             aria-label="Archeon apps homepage"
           >
-            <img src="/images/invoice-studio-icon.svg" width="30" height="30" alt="" />
+            <Image src="/images/invoice-studio-icon.svg" width={30} height={30} alt="" />
             <strong>Invoice Studio</strong>
           </a>
           <div className="login-header-actions">
@@ -875,7 +877,7 @@ function InvoiceDashboard() {
     <div className="shell">
       <aside className={`sidebar ${mobileNav ? "sidebar-open" : ""}`}>
         <div className="brand">
-          <span className="brand-mark"><img src="/images/invoice-studio-icon.svg" alt="" width="33" height="33" /></span>
+          <span className="brand-mark"><Image src="/images/invoice-studio-icon.svg" width={33} height={33} alt="" /></span>
           <div>
             <strong>Invoice Studio</strong>
             <small>BUILT BY ARCHEON</small>

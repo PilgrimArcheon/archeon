@@ -270,7 +270,7 @@ export function useTackCloud() {
       } finally { if (active) setReady(true); }
     })();
     return () => { active = false; };
-  }, [schedule]);
+  }, [persist, schedule]);
 
   useEffect(() => {
     const check = async (): Promise<boolean> => {

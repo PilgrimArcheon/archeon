@@ -12,7 +12,7 @@
   color: var(--p-white);
   padding-top: 92px;
   padding-bottom: 40px;
-  font-family: Manrope, Arial, sans-serif;
+  font-family: var(--font-manrope), Arial, sans-serif;
 }
 .wrap {
   max-width: 1240px;

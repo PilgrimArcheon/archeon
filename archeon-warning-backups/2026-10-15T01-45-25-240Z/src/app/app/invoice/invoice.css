@@ -1,0 +1,816 @@
+/* Route-scoped: no portfolio globals or Tailwind preflight are modified. */
+.invoice-app { background: var(--page, #f7f8fb); color: var(--ink, #1b2233); font-family: "DM Sans", Arial, sans-serif; font-size:14px; min-height:100vh; width:100%; isolation:isolate; }
+.invoice-app, .invoice-app * { box-sizing:border-box; }
+.invoice-app .apps-back-link { display:flex; align-items:center; gap:9px; color:#aeb5d0; text-decoration:none; padding:10px 13px; margin: -19px 0 22px; border-radius:8px; font-size:12px; }
+.invoice-app .apps-back-link:hover { color:white; background:#ffffff12; }
+.invoice-app .login-attribution { display:flex; align-items:center; flex-direction:column; gap:7px; }
+.invoice-app .login-attribution a { color:#a7a9ff; text-decoration:none; }
+.invoice-app .login-attribution a:hover { text-decoration:underline; }
+.invoice-app{--ink:#1b2233;--muted:#8990a0;--indigo:#5359e8;--page:#f7f8fb;--line:#e9ebf1;--card:#fff}
+.invoice-app *{box-sizing:border-box}
+.invoice-app{scroll-behavior:smooth}
+.invoice-app{margin:0;background:var(--page);color:var(--ink);font-family:"DM Sans",Arial,sans-serif;font-size:14px;-webkit-font-smoothing:antialiased}
+.invoice-app button, .invoice-app input, .invoice-app select, .invoice-app textarea{font:inherit}
+.invoice-app button{cursor:pointer}
+.invoice-app button:disabled{cursor:not-allowed;opacity:.56}
+.invoice-app a{text-decoration:none}
+.invoice-app h1, .invoice-app h2, .invoice-app h3, .invoice-app p{margin-top:0}
+.invoice-app h1, .invoice-app h2, .invoice-app h3{font-family:Manrope,"DM Sans",sans-serif;letter-spacing:-.045em}
+.invoice-app h1{font-size:33px;line-height:1.19;font-weight:800}
+.invoice-app h2{font-weight:800}
+.invoice-app p{line-height:1.6}
+.invoice-app input, .invoice-app select, .invoice-app textarea{border:1px solid #e0e3eb;background:white;color:var(--ink);outline:none;transition:border-color .15s,box-shadow .15s;border-radius:9px;width:100%;min-width:0;padding:12px 13px;font-size:13px}
+.invoice-app input:focus, .invoice-app select:focus, .invoice-app textarea:focus{border-color:#8d90fa;box-shadow:0 0 0 3px #5359e813}
+.invoice-app input::placeholder, .invoice-app textarea::placeholder{color:#aab0bb}
+.invoice-app textarea{resize:vertical;line-height:1.55}
+.invoice-app select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b90a3' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-size:16px;background-position:right 12px center;background-repeat:no-repeat;padding-right:32px}
+.invoice-app button:focus-visible{outline:3px solid #6f74f9;outline-offset:3px}
+.invoice-app .spin{animation:archeon-invoice-spin .9s linear infinite}
+@keyframes archeon-invoice-spin{to{transform:rotate(360deg)}}
+.invoice-app .loading-screen{height:100vh;display:flex;align-items:center;justify-content:center;gap:16px;color:var(--indigo)}
+.invoice-app .app-mark, .invoice-app .brand-mark{font-family:Manrope,sans-serif;background:#eef0ff;color:var(--indigo);border-radius:13px;font-size:29px;letter-spacing:-.12em;font-weight:800;display:flex;align-items:center;justify-content:center;width:43px;height:43px;line-height:1}
+.invoice-app .app-mark span, .invoice-app .brand-mark span{color:#f7a768}
+.invoice-app .login-scene{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:linear-gradient(125deg,#e9ebff 0%,#f6f7fc 45%,#e6f2f4 100%);padding:50px 22px}
+.invoice-app .login-glow{position:absolute;filter:blur(2px);width:500px;height:500px;border-radius:50%;pointer-events:none}
+.invoice-app .glow-a{top:-270px;left:-180px;background:#d0d3ff90}
+.invoice-app .glow-b{bottom:-320px;right:-160px;background:#cdebe5}
+.invoice-app .login-card{position:relative;z-index:1;width:min(100%,470px);padding:45px;background:white;box-shadow:0 28px 90px #252c5b15;border:1px solid #fff;border-radius:23px}
+.invoice-app .login-brand{display:flex;align-items:center;gap:12px;font-family:Manrope,sans-serif;font-size:18px;letter-spacing:-.06em;font-weight:800;margin-bottom:48px}
+.invoice-app .login-brand .brand-mark{height:40px;width:40px}
+.invoice-app .light-brand{font-weight:500;color:#969bad}
+.invoice-app .login-icon{height:44px;width:44px;background:#f1f2ff;color:var(--indigo);display:flex;align-items:center;justify-content:center;border-radius:12px;margin-bottom:20px}
+.invoice-app .eyebrow{color:#9097aa;letter-spacing:.15em;font-size:10px;font-weight:800;margin-bottom:10px}
+.invoice-app .login-card h1{font-size:35px;line-height:1.2;margin-bottom:12px}
+.invoice-app .login-card h1 em{font-style:normal;color:var(--indigo)}
+.invoice-app .login-card>p{color:#7a8395;margin-bottom:29px;font-size:14px}
+.invoice-app .login-card .field{margin-bottom:22px}
+.invoice-app .login-card .field-label{font-size:12px}
+.invoice-app .password-wrap{position:relative}
+.invoice-app .password-wrap input{padding-right:70px}
+.invoice-app .text-btn{position:absolute;right:8px;top:8px;border:0;background:#f5f6fa;color:#5b62bf;border-radius:6px;padding:5px 9px;font-size:12px;font-weight:700}
+.invoice-app .login-foot{border-top:1px solid #eef0f5;padding-top:23px;margin-top:30px;color:#9399a7;display:flex;align-items:center;gap:8px;justify-content:center;font-size:11px}
+.invoice-app .login-attribution{position:absolute;bottom:20px;font-size:10px;color:#8891a1;letter-spacing:.15em;font-weight:800}
+.invoice-app .login-error{background:#fff0f0;color:#c04a52;border:1px solid #ffe0e2;border-radius:7px;padding:10px 12px;margin:-7px 0 16px;font-size:12px}
+.invoice-app .btn{height:41px;display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:0 17px;border-radius:9px;border:1px solid transparent;font-size:12.5px;font-weight:800;letter-spacing:-.005em;white-space:nowrap;transition:transform .15s,background .15s,box-shadow .15s}
+.invoice-app .btn:not(:disabled):hover{transform:translateY(-1px)}
+.invoice-app .btn-primary{background:#5359e8;color:#fff;box-shadow:0 4px 8px #5359e816}
+.invoice-app .btn-primary:not(:disabled):hover{background:#4249d3;box-shadow:0 6px 15px #5359e82d}
+.invoice-app .btn-muted{background:#f3f4f8;color:#525b6f;border-color:#f0f1f5}
+.invoice-app .btn-outline{background:white;color:#39415b;border-color:#dce0e9}
+.invoice-app .btn-outline:not(:disabled):hover{border-color:#b4b7f8;color:var(--indigo)}
+.invoice-app .btn-white{background:white;color:#333a6d}
+.invoice-app .btn-ghost-white{background:transparent;color:white;border:1px solid #ffffff46}
+.invoice-app .btn-wide{width:100%;height:47px}
+.invoice-app .btn.slim{margin-bottom:1px;height:40px}
+.invoice-app .icon-button{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:0;border-radius:9px;background:transparent;color:#8f98aa;flex-shrink:0}
+.invoice-app .icon-button:hover{background:#f0f1f8;color:#5359e8}
+.invoice-app .icon-button.danger-hover:hover{background:#fff0f0;color:#cf5964}
+.invoice-app .field{display:flex;flex-direction:column;gap:7px;min-width:0}
+.invoice-app .field-label{color:#484f60;font-size:11px;font-weight:800}
+.invoice-app .field small{color:#9499a8;font-size:11px}
+.invoice-app .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:18px;row-gap:19px}
+.invoice-app .span-two{grid-column:1/-1}
+.invoice-app .notice{padding:13px 16px;display:flex;gap:12px;align-items:center;border-radius:10px;margin-bottom:20px;font-weight:600}
+.invoice-app .notice span{flex:1}
+.invoice-app .notice button{border:0;background:transparent;display:flex}
+.invoice-app .notice.success{color:#137d63;background:#eaf8f2;border:1px solid #d2eee4}
+.invoice-app .notice.danger{color:#bd4651;background:#fff0f1;border:1px solid #ffdade}
+.invoice-app .empty{padding:64px 15px;text-align:center;border:1px dashed #dfe3ed;background:white;border-radius:12px;display:flex;flex-direction:column;align-items:center}
+.invoice-app .empty-icon{height:55px;width:55px;background:#f1f2ff;color:var(--indigo);border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:18px}
+.invoice-app .empty h3{font-size:17px;margin:0 0 9px}
+.invoice-app .empty p{color:#8a91a1;font-size:12.5px;max-width:310px;margin-bottom:21px}
+.invoice-app .link-button{display:inline-flex;align-items:center;gap:7px;background:transparent;border:0;color:var(--indigo);font-size:12px;font-weight:800}
+.invoice-app .link-button:hover{text-decoration:underline}
+.invoice-app .shell{min-height:100vh;display:flex}
+.invoice-app .sidebar{width:244px;flex-shrink:0;background:#161b2b;color:#bdc1d0;min-height:100vh;display:flex;flex-direction:column;padding:31px 15px 16px;position:sticky;top:0;height:100vh;z-index:40}
+.invoice-app .brand{display:flex;align-items:center;gap:12px;padding:0 11px;margin-bottom:49px;color:white;font-family:Manrope,sans-serif;font-size:17px;letter-spacing:-.07em;font-weight:800;white-space:nowrap}
+.invoice-app .brand .brand-mark{background:#555ae8;color:white;width:39px;height:39px;letter-spacing:-.11em;border-radius:11px;flex-shrink:0}
+.invoice-app .brand .brand-mark span{color:#ffc778}
+.invoice-app .brand small{display:block;font-size:8px;letter-spacing:.18em;font-weight:700;color:#666d83;margin-top:2px}
+.invoice-app .brand .light-brand{color:#a9aec5}
+.invoice-app .sidebar-label{padding:0 17px;margin-bottom:12px;font-size:9px;color:#66708a;letter-spacing:.15em;font-weight:800}
+.invoice-app .sidebar nav{display:flex;flex-direction:column;gap:6px}
+.invoice-app .nav-link{height:44px;width:100%;border:0;background:transparent;color:#a0a8bb;border-radius:9px;display:flex;align-items:center;gap:14px;text-align:left;padding:0 16px;font-size:12.5px;font-weight:600}
+.invoice-app .nav-link:hover{background:#252a3c;color:white}
+.invoice-app .nav-link.selected{background:#353a60;color:white;box-shadow:inset 3px 0 0 #8789ff}
+.invoice-app .nav-link.selected svg{color:#aeb0ff}
+.invoice-app .nav-count{margin-left:auto;font-size:10px;color:#c9cbe8;background:#343950;border-radius:5px;padding:3px 6px}
+.invoice-app .sidebar-spacer{flex:1}
+.invoice-app .sidebar-tip{position:relative;overflow:hidden;padding:17px;border-radius:11px;background:#232943;border:1px solid #323957;margin-bottom:23px}
+.invoice-app .tip-spark{color:#f5c778;font-size:22px;margin-bottom:8px}
+.invoice-app .sidebar-tip b{font-family:Manrope,sans-serif;color:#f3f4fc;font-size:12px}
+.invoice-app .sidebar-tip p{font-size:10px;line-height:1.7;color:#a1aac0;margin:7px 0 14px}
+.invoice-app .sidebar-tip button{background:#444a84;color:white;font-size:11px;font-weight:700;border:0;border-radius:7px;padding:8px 10px;display:flex;align-items:center;gap:8px}
+.invoice-app .sidebar-bottom{padding:18px 5px 0;border-top:1px solid #292f43;display:flex;align-items:center;gap:10px}
+.invoice-app .avatar, .invoice-app .tiny-avatar{background:#d8d9ff;color:#5056d8;font-weight:800;display:grid;place-items:center;border-radius:10px;flex-shrink:0}
+.invoice-app .avatar{width:35px;height:35px}
+.invoice-app .profile{min-width:0;flex:1}
+.invoice-app .profile b, .invoice-app .profile small{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.invoice-app .profile b{color:#e9eafa;font-size:11px}
+.invoice-app .profile small{color:#778097;font-size:10px;margin-top:4px}
+.invoice-app .logout:hover{background:#33374f}
+.invoice-app .main-column{flex:1;min-width:0;display:flex;flex-direction:column}
+.invoice-app .topbar{height:75px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 39px;background:#fff;border-bottom:1px solid #eceef4}
+.invoice-app .topbar-left, .invoice-app .topbar-right{display:flex;align-items:center;gap:22px}
+.invoice-app .breadcrumb{font-size:12px;color:#9ca3b3}
+.invoice-app .breadcrumb span{margin:0 10px;color:#c9cfda}
+.invoice-app .breadcrumb b{color:#495164;font-weight:800}
+.invoice-app .today-chip{display:flex;align-items:center;gap:8px;color:#858d9f;font-size:12px;border:1px solid #eceef4;padding:8px 12px;border-radius:8px}
+.invoice-app .tiny-avatar{width:32px;height:32px;font-size:13px}
+.invoice-app .mobile-menu{display:none}
+.invoice-app .back-button{border:0;background:transparent;color:#636b82;display:flex;align-items:center;gap:9px;font-weight:700;font-size:12px}
+.invoice-app .content{padding:37px 39px 0;max-width:1550px;width:100%;margin:0 auto}
+.invoice-app .page-intro, .invoice-app .editor-title{display:flex;justify-content:space-between;align-items:center;gap:24px;margin-bottom:28px}
+.invoice-app .page-intro h1, .invoice-app .editor-title h1{margin:0 0 8px}
+.invoice-app .page-intro p, .invoice-app .editor-title p{color:#9098a8;font-size:12.5px;margin:0}
+.invoice-app .title-dot{color:var(--indigo)}
+.invoice-app .sparkle{color:#e7b660}
+.invoice-app .page-foot{font-size:10px;color:#aab0bd;text-align:center;margin:44px 0 25px}
+.invoice-app .page-foot span{padding:0 8px}
+.invoice-app .hero-panel{height:257px;display:flex;background:#292e67;border-radius:17px;overflow:hidden;position:relative;color:white;margin-bottom:24px}
+.invoice-app .hero-panel::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 84% 7%,#7277d45c,transparent 35%),linear-gradient(100deg,#2e3472,#292d66)}
+.invoice-app .hero-decoration{position:absolute;border:1px solid #ffffff16;border-radius:50%;pointer-events:none}
+.invoice-app .hero-a{height:420px;width:420px;right:60px;top:-194px}
+.invoice-app .hero-b{height:305px;width:305px;right:-98px;bottom:-190px}
+.invoice-app .hero-copy{position:relative;z-index:1;padding:30px 39px;max-width:63%}
+.invoice-app .hero-kicker{font-size:9px;letter-spacing:.16em;color:#c3c7ff;font-weight:800;display:flex;align-items:center;gap:8px;margin-bottom:13px}
+.invoice-app .hero-kicker span{width:6px;height:6px;border-radius:50%;background:#9be7bb}
+.invoice-app .hero-copy h2{font-size:28px;line-height:1.17;margin:0 0 11px;color:white}
+.invoice-app .hero-copy h2 em{font-style:normal;color:#adaeff}
+.invoice-app .hero-copy p{max-width:330px;color:#c8cbea;font-size:11.5px;line-height:1.7;margin-bottom:17px}
+.invoice-app .hero-actions{display:flex;gap:8px}
+.invoice-app .hero-actions .btn{height:36px;font-size:11px}
+.invoice-app .hero-paper{position:absolute;width:230px;height:285px;background:white;right:86px;top:39px;transform:rotate(9deg);box-shadow:0 24px 55px #0c104f8a;border-radius:7px;color:#232b48;padding:21px;z-index:1}
+.invoice-app .mock-head{display:flex;align-items:center;gap:6px;font-size:9px;font-weight:900}
+.invoice-app .mock-head>span{margin-left:auto;color:#9296ab;font-size:7px}
+.invoice-app .mock-logo{width:15px;height:15px;background:#565ce6;border-radius:4px}
+.invoice-app .mock-rule{height:2px;background:#ebedf4;margin:25px 0 18px}
+.invoice-app .mock-row{display:flex;justify-content:space-between;margin-bottom:15px}
+.invoice-app .mock-row span{height:5px;background:#e9ebf2;border-radius:3px;width:57%}
+.invoice-app .mock-row span+span{width:25%}
+.invoice-app .mock-total{border-top:2px solid #f0f1f6;padding-top:14px;margin-top:21px;font-size:8px;display:flex;align-items:center;justify-content:space-between;font-weight:800}
+.invoice-app .mock-total b{font-size:12px;color:#545ae4}
+.invoice-app .mock-stamp{position:absolute;right:19px;bottom:39px;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:#499c7c;border:2px dashed #7dc5a7;transform:rotate(-22deg)}
+.invoice-app .metric-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:34px}
+.invoice-app .metric-card{background:#fff;border:1px solid #eceef4;border-radius:13px;padding:20px;min-width:0}
+.invoice-app .metric-top{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#9399aa;font-size:10px;font-weight:700}
+.invoice-app .metric-icon{height:35px;width:35px;display:grid;place-items:center;border-radius:10px}
+.invoice-app .metric-icon.blue{background:#edeeff;color:#5258d9}
+.invoice-app .metric-icon.orange{background:#fff2e5;color:#e4a65d}
+.invoice-app .metric-icon.green{background:#e9f8ef;color:#3eaa81}
+.invoice-app .metric-icon.purple{background:#f7edff;color:#a368ca}
+.invoice-app .metric-value{font-family:Manrope,sans-serif;font-size:21px;font-weight:800;letter-spacing:-.06em;margin:17px 0 10px;white-space:nowrap}
+.invoice-app .metric-value small{font-size:12px;color:#a8aeb8}
+.invoice-app .metric-bottom{font-size:10px;color:#9fa6b4;display:flex;align-items:center;gap:5px}
+.invoice-app .metric-bottom svg{color:#3eaf87}
+.invoice-app .section-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:19px}
+.invoice-app .section-heading h2{font-size:17px;margin:0 0 4px}
+.invoice-app .section-heading p{color:#9ba3b1;font-size:11px;margin:0}
+.invoice-app .note-ribbon{display:flex;align-items:center;gap:10px;color:#9399a7;font-size:11px;padding:22px 5px}
+.invoice-app .note-ribbon svg{color:#878ce5;flex-shrink:0}
+.invoice-app .list-container{background:white;border-radius:13px;border:1px solid #ebedf3;overflow:hidden}
+.invoice-app .list-toolbar{padding:19px;display:flex;justify-content:space-between;gap:15px;align-items:center;border-bottom:1px solid var(--line)}
+.invoice-app .search-input{display:flex;align-items:center;gap:9px;border:1px solid #e8eaf0;border-radius:9px;padding:0 12px;max-width:390px;width:100%;color:#a2aab9}
+.invoice-app .search-input input{border:0;box-shadow:none!important;padding:10px 0;background:transparent;font-size:12px}
+.invoice-app .select-wrap{position:relative}
+.invoice-app .select-wrap select{background:#f6f7fa;border-color:#f0f1f4;font-size:11px;font-weight:800;color:#656c7f;min-width:132px}
+.invoice-app .select-wrap svg{display:none}
+.invoice-app .table-scroll{overflow-x:auto;border:1px solid #edf0f5;border-radius:12px;background:white}
+.invoice-app .list-container .table-scroll{border:0;border-radius:0}
+.invoice-app .invoice-table{border-collapse:collapse;width:100%;text-align:left;min-width:740px}
+.invoice-app .invoice-table thead{background:#fafbfc}
+.invoice-app .invoice-table th{padding:14px 20px;color:#a1a8b6;font-size:9px;letter-spacing:.11em;font-weight:800;white-space:nowrap}
+.invoice-app .invoice-table tbody tr{border-top:1px solid #f0f1f5;transition:background .15s;cursor:pointer}
+.invoice-app .invoice-table tbody tr:hover{background:#fbfbff}
+.invoice-app .invoice-table td{padding:16px 20px;white-space:nowrap;font-size:11.5px;color:#8790a0}
+.invoice-app .invoice-table td:first-child{min-width:200px}
+.invoice-app .invoice-table td:first-child strong{display:block;color:#3a4153;font-weight:800;font-size:12px;margin-bottom:5px}
+.invoice-app .invoice-table td:first-child span{display:block;font-size:10.5px;color:#989fac}
+.invoice-app .table-client{display:flex;align-items:center;gap:10px;color:#515a6e;font-weight:700}
+.invoice-app .table-avatar{height:28px;width:28px;border-radius:8px;background:#eff0fc;color:#676bdd;display:grid;place-items:center;font-weight:800}
+.invoice-app .invoice-table .amount-cell{font-weight:800;color:#252b3d;font-size:12px}
+.invoice-app .row-menu{display:flex;align-items:center;gap:1px}
+.invoice-app .status{display:inline-flex;align-items:center;gap:7px;border-radius:30px;padding:6px 9px;font-size:10px;font-weight:800;background:#f2f3f7;color:#8d93a0}
+.invoice-app .status-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.invoice-app .status-sent{background:#edf0ff;color:#6469cb}
+.invoice-app .status-paid{background:#e8f7ee;color:#2c9a68}
+.invoice-app .status-partial{background:#eff4ff;color:#3a86b1}
+.invoice-app .status-overdue{background:#fff0f0;color:#d36868}
+.invoice-app .status-draft{background:#f3f4f7;color:#8d93a0}
+.invoice-app .editor-title{align-items:flex-end}
+.invoice-app .editor-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.invoice-app .editor-grid{display:grid;grid-template-columns:minmax(0,1fr) 315px;gap:23px;align-items:start}
+.invoice-app .editor-form{display:flex;flex-direction:column;gap:18px;min-width:0}
+.invoice-app .form-card{background:white;border:1px solid #ebedf2;border-radius:13px;padding:25px;margin-bottom:18px}
+.invoice-app .editor-form .form-card{margin-bottom:0}
+.invoice-app .card-heading{display:flex;gap:13px;align-items:center;margin-bottom:23px}
+.invoice-app .card-heading-inner{display:flex;align-items:center;gap:13px}
+.invoice-app .card-heading h2{font-size:14px;margin:0 0 5px}
+.invoice-app .card-heading p{color:#9ea5b2;font-size:11px;line-height:1.3;margin:0}
+.invoice-app .card-icon{flex-shrink:0;width:38px;height:38px;border-radius:10px;background:#eff0ff;color:var(--indigo);display:grid;place-items:center}
+.invoice-app .space-between{justify-content:space-between}
+.invoice-app .subtle-tag{color:#888f9c;background:#f5f6f9;padding:7px 9px;border-radius:7px;font-size:10px;font-weight:800}
+.invoice-app .saved-client-row{display:flex;align-items:end;gap:10px;margin-bottom:18px}
+.invoice-app .select-grow{flex:1}
+.invoice-app .saved-client-row button{margin-bottom:1px}
+.invoice-app .read-only{background:#f6f7fa;color:#979ead}
+.invoice-app .items-head, .invoice-app .item-fields{display:grid;grid-template-columns:minmax(160px,1fr) 58px minmax(83px,105px) minmax(95px,125px) 26px;gap:10px;align-items:start}
+.invoice-app .items-head{font-size:9px;font-weight:800;color:#a4aab8;letter-spacing:.06em;margin-bottom:12px}
+.invoice-app .items-stack{display:flex;flex-direction:column;gap:13px}
+.invoice-app .item-block{padding:14px 12px 13px;background:#fafbfd;border:1px solid #edf0f5;border-radius:10px}
+.invoice-app .item-fields input{padding:10px 9px;font-size:11.5px}
+.invoice-app .item-fields .secondary-input{margin-top:8px;font-size:10.5px;color:#697589}
+.invoice-app .item-total{font-size:11px;white-space:normal;font-weight:800;text-align:right;padding-top:11px;overflow-wrap:anywhere}
+.invoice-app .item-fields .icon-button{width:26px;height:34px}
+.invoice-app .check-line{margin-top:12px;display:flex;align-items:flex-start;gap:9px;color:#888fa0;font-size:10.5px;line-height:1.4;cursor:pointer}
+.invoice-app .check-line input{accent-color:#5359e8;width:14px;height:14px;flex-shrink:0;margin:0}
+.invoice-app .add-item{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:13px;padding:12px;background:white;border:1px dashed #c5c8f1;border-radius:8px;color:var(--indigo);font-size:11.5px;font-weight:800}
+.invoice-app .add-item:hover{background:#f7f7ff}
+.invoice-app .input-suffix{position:relative}
+.invoice-app .input-suffix input{padding-right:35px}
+.invoice-app .input-suffix span{position:absolute;right:15px;top:11px;color:#9198aa;font-size:13px;font-weight:800}
+.invoice-app .help-text{display:flex;gap:9px;align-items:flex-start;padding:14px;background:#f7f8ff;border-radius:8px;font-size:10.5px;color:#747c96;line-height:1.6;margin-top:20px}
+.invoice-app .help-text svg{flex-shrink:0;color:#676fdf}
+.invoice-app .summary-column{position:sticky;top:22px}
+.invoice-app .summary-card{background:#fff;border:1px solid #e9eaf2;border-radius:13px;overflow:hidden;box-shadow:0 9px 35px #1d275a08}
+.invoice-app .summary-top{padding:22px 23px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f0f1f5}
+.invoice-app .summary-top .eyebrow{font-size:9px;margin-bottom:8px}
+.invoice-app .summary-top h3{font-size:15px;margin:0}
+.invoice-app .summary-seal{width:38px;height:38px;border-radius:10px;background:#eef0ff;color:#5359e8;display:grid;place-items:center}
+.invoice-app .summary-project{padding:23px 23px 16px;display:flex;flex-direction:column;gap:6px}
+.invoice-app .summary-project span{color:#a6adbb;font-size:9px;font-weight:800;letter-spacing:.1em}
+.invoice-app .summary-project strong{font-size:12.5px;line-height:1.4}
+.invoice-app .summary-project small{font-size:11px;color:#9198a6}
+.invoice-app .summary-rows{margin:0 23px;padding:16px 0;border-top:1px solid #f0f1f5}
+.invoice-app .summary-rows div{display:flex;justify-content:space-between;gap:10px;font-size:11px;color:#979dac;padding:8px 0}
+.invoice-app .summary-rows strong{color:#51576a;font-size:11px}
+.invoice-app .summary-total{margin:0 14px 22px;padding:17px 13px;background:#eff0ff;border-radius:9px;display:flex;align-items:center;justify-content:space-between;gap:5px}
+.invoice-app .summary-total span{font-size:9px;font-weight:900;color:#6368aa}
+.invoice-app .summary-total strong{font-size:16px;letter-spacing:-.05em;color:#4f55dc}
+.invoice-app .timeline{padding:0 22px;position:relative}
+.invoice-app .timeline-line{position:absolute;width:1px;background:#e3e6ed;top:17px;bottom:25px;left:37px}
+.invoice-app .timeline-stage{display:flex;gap:14px;position:relative;margin-bottom:27px}
+.invoice-app .timeline-dot{display:grid;place-items:center;flex-shrink:0;height:29px;width:29px;background:#f5f6fa;border:1px solid #e7e9ee;border-radius:50%;color:#9ca3b1}
+.invoice-app .timeline-dot.filled{background:#e7f7ef;border-color:#d4f0e1;color:#33a779}
+.invoice-app .timeline-stage div{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+.invoice-app .timeline-stage b{font-size:11px}
+.invoice-app .timeline-stage small{font-size:9.5px;color:#9da4b1}
+.invoice-app .timeline-stage strong{margin-top:5px;font-family:Manrope,sans-serif;font-size:16px;letter-spacing:-.06em}
+.invoice-app .summary-bottom{display:grid;grid-template-columns:1fr auto;gap:10px;background:#fafbfc;border-top:1px solid #f0f1f5;padding:20px 23px}
+.invoice-app .summary-bottom span{color:#939ba9;font-size:11px}
+.invoice-app .summary-bottom b{font-size:11px}
+.invoice-app .summary-bottom strong{font-size:13px;color:var(--indigo)}
+.invoice-app .summary-info{padding:15px 21px;display:flex;gap:9px;color:#858d9e;background:#f6f7ff;border-top:1px solid #ebedfd;font-size:10px;line-height:1.5}
+.invoice-app .summary-info svg{flex-shrink:0;color:#686ee5}
+.invoice-app .summary-help{margin-top:16px;border:1px solid #e8eaf2;padding:17px;display:flex;align-items:flex-start;gap:12px;border-radius:11px;color:#6469db;background:white}
+.invoice-app .summary-help svg{flex-shrink:0}
+.invoice-app .summary-help b{color:#41475a;font-size:11px}
+.invoice-app .summary-help p{color:#939bad;font-size:10px;margin:6px 0 0;line-height:1.6}
+.invoice-app .editor-bottom{display:flex;justify-content:flex-end;gap:10px;margin:25px 0}
+.invoice-app .client-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.invoice-app .client-card{border-radius:13px;border:1px solid #e9ebf1;background:white;padding:20px;min-width:0}
+.invoice-app .client-row, .invoice-app .client-actions{display:flex;align-items:center;justify-content:space-between}
+.invoice-app .client-avatar{width:43px;height:43px;border-radius:12px;background:#f0f1ff;color:var(--indigo);display:grid;place-items:center;font-weight:800;font-size:17px}
+.invoice-app .client-card h3{font-size:15px;margin:17px 0 4px}
+.invoice-app .client-card>p{font-size:11px;color:#a1a6b3;margin:0 0 20px}
+.invoice-app .client-email{display:flex;align-items:center;gap:7px;font-size:11px;color:#747f90;word-break:break-all}
+.invoice-app .client-email svg{flex-shrink:0}
+.invoice-app .client-foot{border-top:1px solid #f0f1f5;margin-top:22px;padding-top:15px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:10px;color:#a0a6b2}
+.invoice-app .client-foot .link-button{font-size:10px}
+.invoice-app .settings-layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,1fr);gap:18px;align-items:start}
+.invoice-app .color-swatches{display:flex;gap:13px;margin-bottom:23px}
+.invoice-app .swatch{height:38px;width:38px;border:3px solid white;box-shadow:0 0 0 1px #e6e9f0;border-radius:10px;color:#fff;display:grid;place-items:center}
+.invoice-app .swatch.active{box-shadow:0 0 0 2px #8890ff}
+.invoice-app .preview-mini{border:1px solid #edf0f5;border-radius:8px;overflow:hidden;margin-bottom:22px}
+.invoice-app .preview-mini-head{padding:12px 16px;color:white;display:flex;flex-direction:column;gap:8px}
+.invoice-app .preview-mini-head span{font-size:8px;letter-spacing:.07em}
+.invoice-app .preview-mini-head strong{font-size:24px;letter-spacing:-.06em}
+.invoice-app .preview-mini-lines{padding:15px;display:flex;flex-direction:column;gap:9px}
+.invoice-app .preview-mini-lines i{height:6px;border-radius:3px;background:#edf0f5;width:75%}
+.invoice-app .preview-mini-lines i:nth-child(2){width:55%}
+.invoice-app .preview-mini-lines i:nth-child(3){width:90%}
+.invoice-app .preview-mini-lines div{height:15px;width:80%;margin-left:auto;border-radius:3px;opacity:.75}
+.invoice-app .side-info{background:#eff0ff;border-radius:12px;padding:22px;color:#666ac4;font-size:11px}
+.invoice-app .side-info b{display:block;color:#373e6b;font-size:12px;margin:12px 0 6px}
+.invoice-app .side-info p{margin:0;line-height:1.65}
+.invoice-app .modal-cover{position:fixed;inset:0;z-index:90;background:#1016259c;display:grid;place-items:center;padding:22px;overflow:auto}
+.invoice-app .modal{background:white;border-radius:16px;width:min(100%,580px);padding:28px;box-shadow:0 35px 100px #03081938}
+.invoice-app .modal-heading{display:flex;align-items:start;justify-content:space-between;margin-bottom:23px}
+.invoice-app .modal-heading h2{margin:0;font-size:23px}
+.invoice-app .modal-actions{border-top:1px solid #eff0f4;padding-top:20px;margin-top:23px;display:flex;justify-content:flex-end;gap:9px}
+.invoice-app .mobile-overlay{display:none}
+@media (max-width:1280px){.invoice-app .sidebar{width:222px}
+.invoice-app .content{padding-left:27px;padding-right:27px}
+.invoice-app .topbar{padding:0 27px}
+.invoice-app .editor-grid{grid-template-columns:minmax(0,1fr) 290px;gap:17px}
+.invoice-app .metric-grid{gap:10px}
+.invoice-app .metric-card{padding:16px}
+.invoice-app .metric-value{font-size:18px}
+.invoice-app .hero-paper{right:42px}
+.invoice-app .client-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:1080px){.invoice-app .editor-grid{grid-template-columns:1fr}
+.invoice-app .summary-column{position:static;display:grid;grid-template-columns:1.25fr 1fr;gap:18px}
+.invoice-app .summary-help{margin-top:0;align-self:start}
+.invoice-app .metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.invoice-app .editor-title{align-items:start;flex-direction:column}}
+@media (max-width:800px){.invoice-app .sidebar{position:fixed;left:-260px;width:244px;transition:left .2s}
+.invoice-app .sidebar.sidebar-open{left:0}
+.invoice-app .mobile-overlay{display:block;position:fixed;inset:0;z-index:35;background:#090b1a88;border:0}
+.invoice-app .mobile-menu{display:flex}
+.invoice-app .topbar{height:66px;padding:0 20px}
+.invoice-app .content{padding:26px 20px 0}
+.invoice-app .hero-paper{right:15px;opacity:.55}
+.invoice-app .hero-copy{max-width:78%}
+.invoice-app .page-intro{align-items:flex-start}
+.invoice-app .page-intro h1{font-size:29px}
+.invoice-app .settings-layout{grid-template-columns:1fr}}
+@media (max-width:600px){.invoice-app .topbar-right .today-chip{display:none}
+.invoice-app .content{padding:20px 14px 0}
+.invoice-app .page-intro{align-items:flex-start;flex-direction:column;gap:15px;margin-bottom:20px}
+.invoice-app .hero-panel{height:auto;min-height:270px}
+.invoice-app .hero-copy{max-width:100%;padding:27px 23px}
+.invoice-app .hero-copy h2{font-size:26px}
+.invoice-app .hero-paper{opacity:.16;right:-70px;top:60px}
+.invoice-app .hero-actions{flex-wrap:wrap}
+.invoice-app .metric-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.invoice-app .metric-card{padding:14px 12px}
+.invoice-app .metric-top{font-size:9px}
+.invoice-app .metric-icon{width:28px;height:28px}
+.invoice-app .metric-value{font-size:14px;letter-spacing:-.06em}
+.invoice-app .metric-bottom{font-size:9px}
+.invoice-app .section-heading{align-items:start}
+.invoice-app .section-heading h2{font-size:16px}
+.invoice-app .list-toolbar{flex-direction:column;align-items:stretch}
+.invoice-app .list-toolbar .search-input{max-width:none}
+.invoice-app .editor-actions{width:100%}
+.invoice-app .editor-actions .btn{flex:1;padding:0 8px;font-size:11px}
+.invoice-app .editor-grid{gap:14px}
+.invoice-app .form-card{padding:19px 16px}
+.invoice-app .form-grid{gap:13px;grid-template-columns:1fr}
+.invoice-app .span-two{grid-column:auto}
+.invoice-app .items-head{display:none}
+.invoice-app .item-fields{grid-template-columns:1fr 70px 34px;gap:8px}
+.invoice-app .item-fields .item-description{grid-column:1/-1}
+.invoice-app .item-fields .item-total{grid-column:1/3;grid-row:3;text-align:left}
+.invoice-app .item-fields .icon-button{grid-column:3;grid-row:3}
+.invoice-app .item-fields input[aria-label="Quantity"]{grid-column:1;grid-row:2}
+.invoice-app .item-fields input[aria-label="Unit price"]{grid-column:2/4;grid-row:2}
+.invoice-app .summary-column{grid-template-columns:1fr}
+.invoice-app .editor-bottom{flex-wrap:wrap}
+.invoice-app .editor-bottom .btn{flex:1;font-size:11px;padding:0 9px}
+.invoice-app .client-grid{grid-template-columns:1fr}
+.invoice-app .modal{padding:20px}
+.invoice-app .brand{margin-bottom:37px}}
+/* -----------------------------------------------------------------------
+   ARCHEON / INVOICE STUDIO — 2026 DESIGN SYSTEM
+   Everything below is route-scoped. Its tokens mirror /app's neutral
+   charcoal, restrained type, dotted surface and compact geometric cards.
+   Brand colors selected in Settings still apply to client-facing PDFs.
+   ----------------------------------------------------------------------- */
+.invoice-app {
+  --invoice-bg: #0d0d0e;
+  --invoice-panel: #151516;
+  --invoice-raised: #1b1b1d;
+  --invoice-soft: #222225;
+  --invoice-border: #2a2a2d;
+  --invoice-text: #e4e4e6;
+  --invoice-muted: #a0a0a4;
+  --invoice-subtle: #77777b;
+  --invoice-contrast: #0d0d0e;
+  --invoice-accent: #e4e4e6;
+  --invoice-dot: rgba(255,255,255,.075);
+  --invoice-success: #7cc0a2;
+  --invoice-warning: #dfba84;
+  --ink: var(--invoice-text);
+  --muted: var(--invoice-muted);
+  --indigo: var(--invoice-accent);
+  --page: var(--invoice-bg);
+  --card: var(--invoice-panel);
+  --line: var(--invoice-border);
+  font-family: Manrope, ui-sans-serif, system-ui, sans-serif;
+  background-color: var(--invoice-bg);
+  background-image: radial-gradient(circle, var(--invoice-dot) .7px, transparent .95px);
+  background-size: 24px 24px;
+  color: var(--invoice-text);
+  color-scheme: dark;
+}
+:root[data-theme="light"] .invoice-app {
+  --invoice-bg: #f6f6f5;
+  --invoice-panel: #ffffff;
+  --invoice-raised: #fafaf9;
+  --invoice-soft: #eeeeed;
+  --invoice-border: #dededc;
+  --invoice-text: #171717;
+  --invoice-muted: #575757;
+  --invoice-subtle: #767676;
+  --invoice-contrast: #fff;
+  --invoice-accent: #171717;
+  --invoice-dot: rgba(0,0,0,.075);
+  --invoice-success: #2d7c58;
+  --invoice-warning: #935d20;
+  color-scheme: light;
+}
+.invoice-app h1,.invoice-app h2,.invoice-app h3 { font-family: Manrope, ui-sans-serif, system-ui, sans-serif; font-weight: 600; }
+.invoice-app h1 { letter-spacing:-.06em; }
+.invoice-app a {color:inherit}
+.invoice-app :is(button,input,select,textarea) {font-family:inherit}
+.invoice-app button:focus-visible,.invoice-app a:focus-visible,.invoice-app input:focus-visible,.invoice-app select:focus-visible,.invoice-app textarea:focus-visible {outline:2px solid var(--invoice-accent);outline-offset:3px}
+.invoice-app :is(input,textarea,select) {
+  color:var(--invoice-text); background:var(--invoice-raised);
+  border:1px solid var(--invoice-border); border-radius:4px;
+  box-shadow:none; font-size:12px;
+}
+.invoice-app :is(input,textarea,select):focus {border-color:var(--invoice-muted);box-shadow:0 0 0 2px color-mix(in srgb,var(--invoice-accent) 11%,transparent)}
+.invoice-app :is(input,textarea)::placeholder {color:var(--invoice-subtle)}
+.invoice-app select {background-color:var(--invoice-raised)}
+.invoice-app .eyebrow,.invoice-app .sidebar-label,.invoice-app .sectionEyebrow {font-size:10px;letter-spacing:.17em;font-weight:600;color:var(--invoice-muted)}
+.invoice-app .field-label {color:var(--invoice-text);font-weight:600}
+.invoice-app .field small {color:var(--invoice-subtle)}
+.invoice-app .title-dot,.invoice-app .sparkle {color:var(--invoice-accent)}
+.invoice-app .btn {border-radius:4px;font-size:11px;font-weight:600;letter-spacing:0;box-shadow:none;height:40px}
+.invoice-app .btn:not(:disabled):hover {transform:translateY(-1px);box-shadow:none}
+.invoice-app .btn-primary {color:var(--invoice-contrast);background:var(--invoice-accent);border-color:var(--invoice-accent);box-shadow:none}
+.invoice-app .btn-primary:not(:disabled):hover {background:var(--invoice-muted);color:var(--invoice-bg);border-color:var(--invoice-muted);box-shadow:none}
+.invoice-app .btn-outline,.invoice-app .btn-muted {background:var(--invoice-panel);border-color:var(--invoice-border);color:var(--invoice-text)}
+.invoice-app .btn-outline:not(:disabled):hover,.invoice-app .btn-muted:not(:disabled):hover {background:var(--invoice-soft);color:var(--invoice-text);border-color:var(--invoice-muted)}
+.invoice-app .btn-white {color:#0d0d0e;background:#e4e4e6}
+.invoice-app .btn-ghost-white {border-color:#515153;color:#e4e4e6}
+.invoice-app .btn-ghost-white:hover {background:#2a2a2d}
+.invoice-app .icon-button {border-radius:4px;color:var(--invoice-muted)}
+.invoice-app .icon-button:hover {background:var(--invoice-soft);color:var(--invoice-text)}
+.invoice-app .icon-button.danger-hover:hover {background:color-mix(in srgb,#dc7171 12%,var(--invoice-panel));color:#dc7171}
+.invoice-app .link-button {color:var(--invoice-text);font-weight:600}
+.invoice-app .theme-toggle {width:36px;height:36px;display:grid;place-items:center;flex-shrink:0;background:var(--invoice-panel);color:var(--invoice-text);border:1px solid var(--invoice-border);border-radius:4px;transition:border-color .2s,background .2s}
+.invoice-app .theme-toggle:hover {border-color:var(--invoice-muted);background:var(--invoice-raised)}
+
+/* Dedicated login page, styled as a sister to the /app directory. */
+.invoice-app .loading-screen {background:var(--invoice-bg);color:var(--invoice-text)}
+.invoice-app .app-mark,.invoice-app .brand-mark {width:39px;height:39px;background:var(--invoice-accent);color:var(--invoice-contrast);border-radius:4px;font-size:24px;letter-spacing:-.1em;font-weight:600}
+.invoice-app .app-mark span,.invoice-app .brand-mark span{color:inherit}
+.invoice-app .login-scene {min-height:100vh;display:flex;flex-direction:column;justify-content:initial;padding:0;background:transparent;overflow:visible}
+.invoice-app .login-header {display:flex;align-items:center;justify-content:space-between;width:min(1180px,calc(100% - 64px));height:92px;margin:0 auto;border-bottom:1px solid var(--invoice-border);gap:24px}
+.invoice-app .invoice-wordmark {font-weight:650;font-size:24px;letter-spacing:-.075em;color:var(--invoice-text);display:inline-flex;align-items:baseline;gap:6px;white-space:nowrap}
+.invoice-app .invoice-wordmark span {margin-left:-7px}
+.invoice-app .invoice-wordmark small {font-weight:600;letter-spacing:.13em;font-size:10px;color:var(--invoice-muted);margin-left:10px}
+.invoice-app .login-header-actions {display:flex;align-items:center;gap:20px}
+.invoice-app .login-back {font-size:11px;color:var(--invoice-muted);display:inline-flex;align-items:center;gap:8px}
+.invoice-app .login-back:hover {color:var(--invoice-text)}
+.invoice-app .login-grid {width:min(1180px,calc(100% - 64px));margin:auto;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,450px);align-items:center;gap:clamp(40px,7vw,130px);padding:84px 0 112px;flex:1}
+.invoice-app .login-intro {min-width:0}
+.invoice-app .login-kicker {display:flex;align-items:center;gap:11px;color:var(--invoice-muted);font-size:10px;font-weight:600;letter-spacing:.18em;margin-bottom:32px}
+.invoice-app .kicker-dot {width:7px;height:7px;border-radius:50%;display:inline-block;background:var(--invoice-text)}
+.invoice-app .login-intro h1 {font-size:clamp(46px,5.5vw,78px);line-height:1.11;margin:0 0 26px;letter-spacing:-.075em;font-weight:600}
+.invoice-app .login-intro h1 em {font-style:normal;color:var(--invoice-muted)}
+.invoice-app .login-intro>p {font-size:14px;line-height:1.9;color:var(--invoice-muted);max-width:500px;margin:0 0 34px}
+.invoice-app .login-feature-list {display:flex;flex-wrap:wrap;gap:11px;max-width:540px;margin-bottom:70px}
+.invoice-app .login-feature-list span {display:inline-flex;align-items:center;gap:9px;padding:10px 11px;border:1px solid var(--invoice-border);color:var(--invoice-muted);font-size:10px;border-radius:4px;background:var(--invoice-panel)}
+.invoice-app .login-feature-list svg {color:var(--invoice-text)}
+.invoice-app .login-index {border-top:1px solid var(--invoice-border);padding-top:17px;display:flex;justify-content:space-between;gap:12px;color:var(--invoice-subtle);font-size:9px;letter-spacing:.12em}
+.invoice-app .login-card {background:var(--invoice-panel);border:1px solid var(--invoice-border);border-radius:5px;box-shadow:none;padding:35px;width:100%;color:var(--invoice-text)}
+.invoice-app .login-card-top {display:flex;justify-content:space-between;align-items:center;margin-bottom:60px;gap:12px}
+.invoice-app .login-icon {height:42px;width:42px;color:var(--invoice-text);background:var(--invoice-raised);border:1px solid var(--invoice-border);border-radius:4px;margin:0}
+.invoice-app .login-card-index {font-size:9px;letter-spacing:.12em;color:var(--invoice-subtle)}
+.invoice-app .login-card h2 {font-size:32px;line-height:1.15;letter-spacing:-.06em;margin:7px 0 10px}
+.invoice-app .login-card>p {font-size:12px;line-height:1.85;color:var(--invoice-muted);margin-bottom:27px}
+.invoice-app .login-card .field {margin-bottom:20px}
+.invoice-app .text-btn {border-radius:3px;background:var(--invoice-soft);color:var(--invoice-text);font-weight:600}
+.invoice-app .login-foot {color:var(--invoice-subtle);border-color:var(--invoice-border);font-size:10px;justify-content:flex-start}
+.invoice-app .login-attribution {position:static;width:min(1180px,calc(100% - 64px));margin:0 auto;display:flex;flex-direction:row;justify-content:space-between;align-items:center;border-top:1px solid var(--invoice-border);padding:27px 0 35px;color:var(--invoice-subtle);letter-spacing:.14em;font-weight:500;font-size:9px}
+.invoice-app .login-error {color:#e8a6a6;background:color-mix(in srgb,#e66d6d 10%,var(--invoice-panel));border-color:color-mix(in srgb,#e66d6d 27%,var(--invoice-panel));border-radius:4px}
+
+/* Dashboard frame, navigation and app chrome. */
+.invoice-app .sidebar {width:248px;background:var(--invoice-panel);color:var(--invoice-muted);border-right:1px solid var(--invoice-border);padding:31px 16px 17px}
+.invoice-app .brand {color:var(--invoice-text);font-size:17px;padding:0 7px;margin-bottom:48px}
+.invoice-app .brand .brand-mark {background:var(--invoice-text);color:var(--invoice-contrast);width:35px;height:35px;border-radius:3px}
+.invoice-app .brand .light-brand {color:var(--invoice-muted);font-weight:500;letter-spacing:-.045em}
+.invoice-app .brand small {color:var(--invoice-subtle);font-size:8px;letter-spacing:.1em;margin-top:6px}
+.invoice-app .apps-back-link {color:var(--invoice-muted);border:1px solid var(--invoice-border);margin:-13px 3px 30px;border-radius:4px;padding:11px 12px}
+.invoice-app .apps-back-link:hover {color:var(--invoice-text);background:var(--invoice-raised)}
+.invoice-app .sidebar-label {padding:0 13px;margin-bottom:13px;color:var(--invoice-subtle)}
+.invoice-app .nav-link {border-radius:4px;color:var(--invoice-muted);font-size:12px;font-weight:500;height:43px;padding:0 13px}
+.invoice-app .nav-link:hover {color:var(--invoice-text);background:var(--invoice-raised)}
+.invoice-app .nav-link.selected {background:var(--invoice-soft);color:var(--invoice-text);box-shadow:inset 2px 0 0 var(--invoice-text)}
+.invoice-app .nav-link.selected svg {color:var(--invoice-text)}
+.invoice-app .nav-count {background:var(--invoice-raised);border:1px solid var(--invoice-border);color:var(--invoice-muted);border-radius:3px}
+.invoice-app .sidebar-tip {background:var(--invoice-raised);border:1px solid var(--invoice-border);border-radius:4px;padding:18px;margin-bottom:20px}
+.invoice-app .tip-spark {color:var(--invoice-text);font-size:23px;font-weight:300}
+.invoice-app .sidebar-tip b {color:var(--invoice-text);font-weight:600}
+.invoice-app .sidebar-tip p {color:var(--invoice-muted)}
+.invoice-app .sidebar-tip button {background:var(--invoice-text);color:var(--invoice-contrast);border-radius:3px;font-weight:600}
+.invoice-app .sidebar-bottom {border-top:1px solid var(--invoice-border)}
+.invoice-app .avatar,.invoice-app .tiny-avatar {background:var(--invoice-soft);color:var(--invoice-text);border:1px solid var(--invoice-border);border-radius:4px}
+.invoice-app .profile b {color:var(--invoice-text)}
+.invoice-app .profile small {color:var(--invoice-subtle)}
+.invoice-app .logout:hover {background:var(--invoice-soft)}
+.invoice-app .main-column {background:transparent}
+.invoice-app .topbar {height:76px;background:color-mix(in srgb,var(--invoice-bg) 90%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--invoice-border);padding:0 40px}
+.invoice-app .topbar-right {gap:12px}
+.invoice-app .today-chip {color:var(--invoice-muted);border-color:var(--invoice-border);border-radius:4px}
+.invoice-app .breadcrumb {color:var(--invoice-subtle)}
+.invoice-app .breadcrumb span {color:var(--invoice-subtle)}
+.invoice-app .breadcrumb b {color:var(--invoice-text);font-weight:600}
+.invoice-app .back-button {color:var(--invoice-text)}
+.invoice-app .content {max-width:1420px;padding:47px 42px 0}
+.invoice-app .page-intro,.invoice-app .editor-title {margin-bottom:30px}
+.invoice-app .page-intro h1,.invoice-app .editor-title h1 {font-size:clamp(28px,3vw,38px);font-weight:600;letter-spacing:-.06em}
+.invoice-app .page-intro p,.invoice-app .editor-title p {color:var(--invoice-muted);font-size:12px;line-height:1.9}
+.invoice-app .page-foot {color:var(--invoice-subtle)}
+
+/* Monochrome hero and document illustration. */
+.invoice-app .hero-panel {background:var(--invoice-panel);border:1px solid var(--invoice-border);border-radius:5px;height:280px;isolation:isolate}
+.invoice-app .hero-panel::before {background:radial-gradient(circle,rgba(255,255,255,.085) .65px,transparent .95px);background-size:22px 22px;opacity:.66}
+:root[data-theme="light"] .invoice-app .hero-panel::before {background:radial-gradient(circle,rgba(0,0,0,.075) .65px,transparent .95px);background-size:22px 22px}
+.invoice-app .hero-decoration {border-color:var(--invoice-border)}
+.invoice-app .hero-copy {padding:36px 42px;max-width:62%;color:var(--invoice-text)}
+.invoice-app .hero-kicker {color:var(--invoice-muted);font-weight:600;letter-spacing:.18em}
+.invoice-app .hero-kicker span {background:var(--invoice-text)}
+.invoice-app .hero-copy h2 {font-size:31px;font-weight:600;line-height:1.23;color:var(--invoice-text);letter-spacing:-.055em}
+.invoice-app .hero-copy h2 em {color:var(--invoice-muted)}
+.invoice-app .hero-copy p {color:var(--invoice-muted);max-width:390px;line-height:1.75}
+.invoice-app .hero-paper {background:#f6f6f5;color:#171717;box-shadow:0 23px 48px #0004;border:1px solid #dededc;border-radius:4px;right:105px;top:39px}
+.invoice-app .mock-logo {background:#171717;border-radius:2px}
+.invoice-app .mock-rule {background:#d3d3d1}
+.invoice-app .mock-row span {background:#d1d1d0}
+.invoice-app .mock-total {border-color:#d1d1d0}
+.invoice-app .mock-total b {color:#171717}
+.invoice-app .mock-stamp {color:#242424;border-color:#888}
+
+/* Surfaces and information hierarchy. */
+.invoice-app .metric-grid {gap:14px;margin-bottom:40px}
+.invoice-app .metric-card,.invoice-app .form-card,.invoice-app .list-container,.invoice-app .client-card,.invoice-app .summary-card {background:var(--invoice-panel);border:1px solid var(--invoice-border);border-radius:5px;box-shadow:none}
+.invoice-app .metric-card {padding:20px}
+.invoice-app .metric-top {color:var(--invoice-muted);font-size:10px;font-weight:500}
+.invoice-app .metric-icon,.invoice-app .metric-icon.blue,.invoice-app .metric-icon.orange,.invoice-app .metric-icon.green,.invoice-app .metric-icon.purple {background:var(--invoice-raised);color:var(--invoice-text);border:1px solid var(--invoice-border);border-radius:4px}
+.invoice-app .metric-value {color:var(--invoice-text);font-size:clamp(17px,1.6vw,23px);font-weight:600}
+.invoice-app .metric-value small,.invoice-app .metric-bottom {color:var(--invoice-subtle)}
+.invoice-app .metric-bottom svg {color:var(--invoice-muted)}
+.invoice-app .section-heading h2 {color:var(--invoice-text);font-weight:600;font-size:21px}
+.invoice-app .section-heading p,.invoice-app .note-ribbon {color:var(--invoice-muted)}
+.invoice-app .note-ribbon svg {color:var(--invoice-text)}
+.invoice-app .empty {background:var(--invoice-panel);border-color:var(--invoice-border);border-radius:5px}
+.invoice-app .empty-icon {background:var(--invoice-raised);border:1px solid var(--invoice-border);color:var(--invoice-text);border-radius:4px}
+.invoice-app .empty h3 {color:var(--invoice-text)}
+.invoice-app .empty p {color:var(--invoice-muted)}
+.invoice-app .notice {border-radius:4px;font-size:12px}
+.invoice-app .notice.success {color:var(--invoice-success);background:var(--invoice-panel);border-color:var(--invoice-border)}
+.invoice-app .notice.danger {color:#d99696;background:var(--invoice-panel);border-color:var(--invoice-border)}
+.invoice-app .notice button {color:inherit}
+.invoice-app .list-toolbar {border-color:var(--invoice-border)}
+.invoice-app .search-input {color:var(--invoice-muted);background:var(--invoice-raised);border-color:var(--invoice-border);border-radius:4px}
+.invoice-app .search-input input {background:transparent;border:0}
+.invoice-app .select-wrap select {background:var(--invoice-raised);border-color:var(--invoice-border);color:var(--invoice-text);border-radius:4px;font-weight:500}
+.invoice-app .table-scroll {background:var(--invoice-panel);border-color:var(--invoice-border);border-radius:5px}
+.invoice-app .invoice-table thead {background:var(--invoice-raised)}
+.invoice-app .invoice-table th {color:var(--invoice-subtle);font-weight:600}
+.invoice-app .invoice-table tbody tr {border-color:var(--invoice-border)}
+.invoice-app .invoice-table tbody tr:hover {background:var(--invoice-raised)}
+.invoice-app .invoice-table td {color:var(--invoice-muted)}
+.invoice-app .invoice-table td:first-child strong {color:var(--invoice-text);font-weight:600}
+.invoice-app .invoice-table td:first-child span {color:var(--invoice-subtle)}
+.invoice-app .table-client {color:var(--invoice-text);font-weight:500}
+.invoice-app .table-avatar,.invoice-app .client-avatar {background:var(--invoice-raised);color:var(--invoice-text);border:1px solid var(--invoice-border);border-radius:4px}
+.invoice-app .invoice-table .amount-cell {color:var(--invoice-text);font-weight:600}
+.invoice-app .status,.invoice-app .status-sent,.invoice-app .status-draft {background:var(--invoice-raised);color:var(--invoice-muted);border:1px solid var(--invoice-border);font-weight:600}
+.invoice-app .status-paid {background:color-mix(in srgb,var(--invoice-success) 10%,var(--invoice-panel));color:var(--invoice-success);border:1px solid var(--invoice-border)}
+.invoice-app .status-partial {background:var(--invoice-raised);color:var(--invoice-text);border:1px solid var(--invoice-border)}
+.invoice-app .status-overdue {background:color-mix(in srgb,var(--invoice-warning) 10%,var(--invoice-panel));color:var(--invoice-warning);border:1px solid var(--invoice-border)}
+
+/* Editor, item list, live summary, clients, settings and modal dialogs. */
+.invoice-app .form-card {padding:27px}
+.invoice-app .card-heading h2 {color:var(--invoice-text);font-weight:600;font-size:16px}
+.invoice-app .card-heading p {color:var(--invoice-muted);line-height:1.6}
+.invoice-app .card-icon,.invoice-app .summary-seal {background:var(--invoice-raised);border:1px solid var(--invoice-border);color:var(--invoice-text);border-radius:4px}
+.invoice-app .subtle-tag {background:var(--invoice-raised);border:1px solid var(--invoice-border);border-radius:4px;color:var(--invoice-muted);font-weight:500}
+.invoice-app .read-only {background:var(--invoice-soft);color:var(--invoice-muted)}
+.invoice-app .items-head {color:var(--invoice-subtle);font-weight:600}
+.invoice-app .item-block {background:var(--invoice-raised);border-color:var(--invoice-border);border-radius:4px}
+.invoice-app .item-fields .secondary-input {color:var(--invoice-muted)}
+.invoice-app .item-total {color:var(--invoice-text);font-weight:600}
+.invoice-app .check-line {color:var(--invoice-muted)}
+.invoice-app .check-line input {accent-color:var(--invoice-text)}
+.invoice-app .add-item {background:var(--invoice-panel);border-color:var(--invoice-border);border-radius:4px;color:var(--invoice-text);font-weight:600}
+.invoice-app .add-item:hover {background:var(--invoice-raised)}
+.invoice-app .input-suffix span {color:var(--invoice-subtle)}
+.invoice-app .help-text,.invoice-app .side-info,.invoice-app .summary-info {background:var(--invoice-raised);color:var(--invoice-muted);border:1px solid var(--invoice-border);border-radius:4px}
+.invoice-app .help-text svg,.invoice-app .summary-info svg,.invoice-app .side-info svg {color:var(--invoice-text)}
+.invoice-app .summary-top {border-color:var(--invoice-border)}
+.invoice-app .summary-top h3 {color:var(--invoice-text)}
+.invoice-app .summary-project span,.invoice-app .summary-project small {color:var(--invoice-subtle)}
+.invoice-app .summary-project strong {color:var(--invoice-text)}
+.invoice-app .summary-rows {border-color:var(--invoice-border)}
+.invoice-app .summary-rows div {color:var(--invoice-muted)}
+.invoice-app .summary-rows strong {color:var(--invoice-text)}
+.invoice-app .summary-total {background:var(--invoice-text);border-radius:4px}
+.invoice-app .summary-total span,.invoice-app .summary-total strong {color:var(--invoice-contrast)}
+.invoice-app .timeline-line {background:var(--invoice-border)}
+.invoice-app .timeline-dot {background:var(--invoice-raised);border-color:var(--invoice-border);color:var(--invoice-muted)}
+.invoice-app .timeline-dot.filled {background:var(--invoice-soft);border-color:var(--invoice-border);color:var(--invoice-text)}
+.invoice-app .timeline-stage b,.invoice-app .timeline-stage strong {color:var(--invoice-text)}
+.invoice-app .timeline-stage small {color:var(--invoice-subtle)}
+.invoice-app .summary-bottom {background:var(--invoice-raised);border-color:var(--invoice-border)}
+.invoice-app .summary-bottom span {color:var(--invoice-muted)}
+.invoice-app .summary-bottom b {color:var(--invoice-text)}
+.invoice-app .summary-bottom strong {color:var(--invoice-text)}
+.invoice-app .summary-info {margin:0;border-left:0;border-right:0;border-bottom:0;border-radius:0}
+.invoice-app .summary-help {background:var(--invoice-panel);border-color:var(--invoice-border);border-radius:5px;color:var(--invoice-text)}
+.invoice-app .summary-help b {color:var(--invoice-text)}
+.invoice-app .summary-help p {color:var(--invoice-muted)}
+.invoice-app .client-card h3 {color:var(--invoice-text)}
+.invoice-app .client-card>p,.invoice-app .client-email,.invoice-app .client-foot {color:var(--invoice-muted)}
+.invoice-app .client-foot {border-color:var(--invoice-border)}
+.invoice-app .swatch {border:3px solid var(--invoice-panel);border-radius:4px;box-shadow:0 0 0 1px var(--invoice-border)}
+.invoice-app .swatch.active {box-shadow:0 0 0 2px var(--invoice-text)}
+.invoice-app .preview-mini {border-color:var(--invoice-border);border-radius:4px}
+.invoice-app .preview-mini-lines i {background:var(--invoice-soft)}
+.invoice-app .side-info b {color:var(--invoice-text)}
+.invoice-app .modal-cover {background:#000b;backdrop-filter:blur(4px)}
+.invoice-app .modal {background:var(--invoice-panel);border:1px solid var(--invoice-border);border-radius:5px;color:var(--invoice-text);box-shadow:0 32px 100px #0006}
+.invoice-app .modal-heading h2 {color:var(--invoice-text)}
+.invoice-app .modal-actions {border-color:var(--invoice-border)}
+.invoice-app .mobile-overlay {background:#000a}
+
+@media (max-width:1280px) {
+  .invoice-app .content {padding-left:28px;padding-right:28px}
+  .invoice-app .topbar {padding-left:28px;padding-right:28px}
+  .invoice-app .hero-paper {right:45px}
+}
+@media (max-width:900px) {
+  .invoice-app .login-grid {grid-template-columns:1fr;gap:38px;padding:70px 0 80px}
+  .invoice-app .login-feature-list {margin-bottom:32px}
+  .invoice-app .login-card {max-width:560px}
+}
+@media (max-width:800px) {
+  .invoice-app .sidebar {left:-270px;width:248px}
+  .invoice-app .sidebar.sidebar-open {left:0}
+  .invoice-app .topbar {padding:0 20px}
+  .invoice-app .content {padding:28px 20px 0}
+  .invoice-app .login-header,.invoice-app .login-grid,.invoice-app .login-attribution {width:min(100% - 36px,650px)}
+}
+@media (max-width:600px) {
+  .invoice-app .login-header {height:75px}
+  .invoice-app .invoice-wordmark {font-size:21px}
+  .invoice-app .invoice-wordmark small {font-size:8px;letter-spacing:.07em;margin-left:3px}
+  .invoice-app .login-back {font-size:0;gap:0}
+  .invoice-app .login-back svg {width:20px;height:20px}
+  .invoice-app .login-header-actions {gap:13px}
+  .invoice-app .login-grid {padding:55px 0 65px}
+  .invoice-app .login-intro h1 {font-size:clamp(38px,10vw,55px)}
+  .invoice-app .login-intro>p {font-size:12px}
+  .invoice-app .login-index span,.invoice-app .login-attribution span:last-child {display:none}
+  .invoice-app .login-card {padding:25px 22px}
+  .invoice-app .login-card-top {margin-bottom:37px}
+  .invoice-app .topbar .theme-toggle {width:32px;height:32px}
+  .invoice-app .topbar-right {gap:10px}
+  .invoice-app .hero-panel {min-height:285px}
+  .invoice-app .hero-copy {padding:30px 23px}
+  .invoice-app .hero-copy h2 {font-size:27px}
+  .invoice-app .content {padding:23px 15px 0}
+  .invoice-app .page-intro h1,.invoice-app .editor-title h1 {font-size:30px}
+  .invoice-app .form-card {padding:19px 16px}
+  .invoice-app .metric-card {padding:14px 12px}
+}
+@media (prefers-reduced-motion:reduce) {
+  .invoice-app *, .invoice-app *::before, .invoice-app *::after {animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+
+/* Public guest-first Invoice Studio */
+.invoice-app .guest-sample-btn {margin-top:10px}
+.invoice-app .guest-login-divider {display:flex;align-items:center;gap:10px;margin:25px 0 18px;color:var(--invoice-muted);font-size:10px;letter-spacing:.09em}
+.invoice-app .guest-login-divider:before,.invoice-app .guest-login-divider:after {content:"";height:1px;flex:1;background:var(--invoice-border)}
+.invoice-app .guest-login-divider span {text-align:center}
+.invoice-app .guest-workspace {min-height:100vh;background:var(--invoice-bg);color:var(--invoice-text);}
+.invoice-app .guest-topbar {display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px clamp(20px,4vw,52px);border-bottom:1px solid var(--invoice-border);background:var(--invoice-panel)}
+.invoice-app .guest-topbar>div {display:flex;align-items:center;gap:12px}
+.invoice-app .guest-mode-label {font-size:10px;letter-spacing:.12em;color:var(--invoice-muted)}
+.invoice-app .guest-content {width:min(1250px,calc(100% - 32px));margin:0 auto;padding:36px 0 65px}
+.invoice-app .guest-banner {display:flex;justify-content:space-between;align-items:center;gap:20px;border:1px solid var(--invoice-border);background:var(--invoice-panel);border-radius:6px;padding:18px 24px;margin:0 0 29px}
+.invoice-app .guest-banner b {font-size:14px}
+.invoice-app .guest-banner p {font-size:12px;color:var(--invoice-muted);margin:4px 0 0}
+.invoice-app .pdf-modal {position:fixed;z-index:200;inset:3vh 3vw;background:var(--invoice-panel);color:var(--invoice-text);border:1px solid var(--invoice-border);border-radius:8px;box-shadow:0 0 0 100vh #000b;display:flex;flex-direction:column;overflow:hidden}
+.invoice-app .pdf-modal-head {height:60px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--invoice-border)}
+.invoice-app .pdf-modal iframe {border:0;width:100%;height:100%;background:white}
+@media(max-width:700px){.invoice-app .guest-topbar {padding:14px 16px}.invoice-app .guest-mode-label {display:none}.invoice-app .guest-banner {flex-direction:column;align-items:stretch}.invoice-app .guest-banner .btn {width:100%}.invoice-app .guest-content {padding-top:22px}.invoice-app .pdf-modal {inset:2vh 2vw}}
+.invoice-app .verify-wrap {flex:1;display:grid;place-items:center;padding:70px 18px}
+.invoice-app .verify-wrap .login-card {max-width:480px}
+.invoice-app .verify-wrap .login-card-top {margin-bottom:40px}
+
+.invoice-app .currency-toolbar {display:flex;gap:14px;align-items:center;justify-content:flex-end;margin:-6px 0 15px;color:var(--invoice-muted);font-size:10px;font-weight:600;letter-spacing:.12em}
+.invoice-app .currency-toolbar select {max-width:160px;font-size:12px;letter-spacing:0}
+@media (max-width:600px){.invoice-app .currency-toolbar {justify-content:space-between;letter-spacing:.07em}.invoice-app .currency-toolbar select{max-width:150px}}
+
+/* Unemailed invoices are fully usable; internal persistence state is not a client-facing badge. */
+.invoice-app .invoice-status-neutral{color:var(--invoice-muted);font-size:12px;font-weight:500}
+/* Shared account form; scoped to Invoice Studio. */
+.invoice-app .account-password-wrap{position:relative}
+.invoice-app .account-password-wrap input{padding-right:70px}
+.invoice-app .account-password-show{position:absolute;top:50%;right:8px;transform:translateY(-50%);border:1px solid var(--line,#dddddd);background:transparent;border-radius:5px;padding:5px 9px;font-size:12px;color:inherit}
+.invoice-app .invoice-auth-switch{display:block;border:0;background:transparent;color:inherit;text-decoration:underline;font-size:12px;margin:16px auto 0;padding:5px;cursor:pointer}
+
+/* Manual invoice delivery/payment tracking; inherits both app themes. */
+.invoice-app .tracking-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:14px;border:1px solid var(--invoice-border);border-radius:5px;background:var(--invoice-panel);margin:0 0 18px}
+.invoice-app .tracking-label{font-size:10px;letter-spacing:.04em;color:var(--invoice-muted);flex-basis:100%}
+.invoice-app .tracking-summary{margin-right:auto;font-size:12px;color:var(--invoice-text);font-weight:600}
+.invoice-app .tracking-action{border:1px solid var(--invoice-border);color:var(--invoice-text);background:var(--invoice-panel);font-size:10px;border-radius:4px;padding:7px 9px;white-space:nowrap;cursor:pointer}
+.invoice-app .tracking-action:hover{background:var(--invoice-raised);border-color:var(--invoice-muted)}
+.invoice-app .tracking-action:disabled{opacity:.5;cursor:wait}
+.invoice-app .tracking-amount{display:block;color:var(--invoice-muted);font-size:10px;margin-top:4px;font-weight:400}
+.invoice-app .tracking-toolbar button:disabled{opacity:.6;cursor:wait}
+@media(max-width:800px){.invoice-app .tracking-toolbar{align-items:stretch}.invoice-app .tracking-summary{flex-basis:100%}.invoice-app .tracking-toolbar .btn{flex:1}}
+
+.invoice-app .tracking-dialog-meta{font-size:12px;color:var(--invoice-muted);margin:0 0 16px}
+.invoice-app .tracking-dialog-totals{display:flex;flex-direction:column;gap:8px;padding:14px;margin-bottom:22px;border:1px solid var(--invoice-border);background:var(--invoice-raised);border-radius:4px}
+.invoice-app .tracking-dialog-totals span{display:flex;justify-content:space-between;gap:16px;color:var(--invoice-muted);font-size:12px}
+.invoice-app .tracking-dialog-totals b{color:var(--invoice-text)}
+.invoice-app .tracking-error{color:var(--invoice-warning);font-size:12px;margin-top:12px}
+
+/* Invoice PDF appearance controls: fully isolated from portfolio styles. */
+.invoice-app .appearance-options {display:grid;gap:17px;}
+.invoice-app .appearance-templates {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
+.invoice-app .appearance-template {padding:10px 8px;text-align:left;display:flex;flex-direction:column;gap:5px;border:1px solid var(--line,#ddd);border-radius:12px;background:var(--card,#fff);color:var(--ink,#222);}
+.invoice-app .appearance-template.selected {outline:2px solid var(--ink,#222);outline-offset:-2px;}
+.invoice-app .appearance-template strong{font-size:13px;}
+.invoice-app .appearance-template small{font-size:10px;line-height:1.3;color:var(--muted,#777);}
+.invoice-app .appearance-template-art {height:68px;border:1px solid #e7e7e7;background:#fff;width:100%;position:relative;overflow:hidden;border-radius:4px;display:flex;flex-direction:column;gap:5px;padding:8px;}
+.invoice-app .appearance-template-art i{height:22px;background:#1b1d22;margin:-8px -8px 3px;}
+.invoice-app .appearance-template-art.modern i{background:var(--accent-color);}
+.invoice-app .appearance-template-art.minimal i{height:3px;background:var(--accent-color);margin:18px -8px 2px;}
+.invoice-app .appearance-template-art b{height:4px;background:#929292;width:50%;}
+.invoice-app .appearance-template-art span{height:3px;background:#ddd;width:90%;}
+.invoice-app .appearance-template-art span+span{width:70%;}
+.invoice-app .appearance-template-art em{width:38%;height:5px;background:var(--accent-color);align-self:flex-end;}
+.invoice-app .appearance-field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+.invoice-app .appearance-color-field{display:flex;align-items:stretch;gap:8px;}
+.invoice-app .appearance-color-field input[type=color]{padding:3px;width:54px;min-width:54px;height:43px;cursor:pointer;}
+.invoice-app .appearance-color-field input:not([type=color]){font-family:monospace;}
+.invoice-app .appearance-swatches{display:flex;gap:9px;flex-wrap:wrap;}
+.invoice-app .appearance-swatches button{border-radius:50%;width:28px;height:28px;color:#fff;font-weight:bold;border:2px solid #ffffff7e;box-shadow:0 0 0 1px #0002;}
+.invoice-app .appearance-swatches button.selected{outline:2px solid var(--ink,#222);outline-offset:2px;}
+.invoice-app .appearance-hint{font-size:12px;color:var(--muted,#777);line-height:1.5;margin:0;}
+.invoice-app .appearance-editor{background:var(--card,#fff);border:1px solid var(--line,#ddd);border-radius:14px;padding:14px 20px;margin-bottom:20px;}
+.invoice-app .appearance-editor summary{cursor:pointer;font-weight:700;display:flex;align-items:center;gap:10px;}
+.invoice-app .appearance-editor summary span{margin-left:auto;color:var(--muted,#888);font-weight:400;font-size:12px;}
+.invoice-app .appearance-editor[open] summary{margin-bottom:18px;}
+.invoice-app .appearance-editor>.btn{margin-top:17px;}
+/* Gmail composer lives at its own URL and opens in a separate desktop tab. */
+.invoice-app .archeon-email-page{max-width:1150px;padding:34px 28px 90px;margin:0 auto;min-height:100vh;}
+.invoice-app .archeon-email-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:40px;gap:18px;}
+.invoice-app .archeon-email-head span{font-size:11px;letter-spacing:.13em;color:var(--muted,#777);}
+.invoice-app .archeon-email-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(290px,.85fr);gap:20px;align-items:start;}
+.invoice-app .archeon-email-buttons{display:flex;flex-wrap:wrap;gap:10px;margin-top:17px;}
+.invoice-app .archeon-email-note{font-size:12px;line-height:1.6;color:var(--muted,#777);margin-top:17px;}
+.invoice-app .archeon-email-grid aside .btn{margin-bottom:12px;display:inline-flex;}
+.invoice-app .archeon-email-grid aside hr{border:0;border-top:1px solid var(--line,#ddd);margin:18px 0;}
+@media (max-width:800px){.invoice-app .archeon-email-grid{grid-template-columns:1fr}.invoice-app .appearance-templates{gap:5px}.invoice-app .appearance-field-grid{grid-template-columns:1fr}.invoice-app .appearance-editor summary span{display:none}}
+
+/* Archeon Apps 2026 design language: tactile paper, soft graphite and sea-glass accents. */
+.invoice-app{--indigo:#376e62;--page:#f4f2ec;--ink:#252a28;--muted:#6a736d;--line:#deddd5;--card:#fffefa;font-family:Manrope,system-ui,sans-serif}
+.invoice-app .shell,.invoice-app .guest-workspace{background:#f4f2ec}
+.invoice-app :is(.form-card,.metric-card,.list-container,.appearance-editor,.guest-banner,.login-card,.table-scroll){background:#fffefa;border-color:#dddcd3;border-radius:12px;box-shadow:0 2px 3px rgba(30,44,36,.025),0 10px 35px rgba(42,54,42,.035)}
+.invoice-app .form-card{background-image:linear-gradient(180deg,rgba(255,255,255,.83),rgba(250,249,243,.8))}
+.invoice-app :is(.btn-primary,.login-scene .btn-primary){background:#263c34;color:#fff;border-color:#263c34}
+.invoice-app .login-scene{background:radial-gradient(circle at 80% 5%,#dceee4 0,transparent 46%),linear-gradient(145deg,#f3f2ec,#eaece6)}
+.invoice-app .brand-mark{background:#e8efe8;border:1px solid #d7e3d7;border-radius:12px}.invoice-app .brand-mark img{width:32px;height:32px;object-fit:contain}
+.invoice-app .invoice-wordmark{display:inline-flex;align-items:center;gap:10px;font-family:Manrope,system-ui,sans-serif;font-weight:850;color:inherit}.invoice-app .invoice-wordmark strong{font-size:15px;letter-spacing:-.04em}.invoice-app .invoice-wordmark img{flex-shrink:0}
+.invoice-app .invoice-shared-auth{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;text-decoration:none}
+.invoice-app .sidebar .brand{display:flex;align-items:center;gap:12px}.invoice-app .sidebar .brand strong{font-size:16px;letter-spacing:-.04em}
+:root[data-theme="dark"] .invoice-app{--page:#111715;--ink:#e6ede6;--muted:#a3b4aa;--line:#34453d;--card:#1c2521}
+:root[data-theme="dark"] .invoice-app :is(.shell,.guest-workspace){background:#121916;color:#e5eee8}
+:root[data-theme="dark"] .invoice-app :is(.form-card,.metric-card,.list-container,.appearance-editor,.guest-banner,.login-card,.table-scroll){background:#1e2923;color:#e5eee8;border-color:#39463d;box-shadow:none}
+:root[data-theme="dark"] .invoice-app :is(.form-card input,.form-card select,.form-card textarea,.login-card input,.login-card select,.login-card textarea){background:#15211b;color:#edf6ee;border-color:#476050}
+:root[data-theme="dark"] .invoice-app .login-scene{background:radial-gradient(circle at 80% 5%,#194337 0,transparent 50%),linear-gradient(145deg,#131b17,#1a2921)}
+:root[data-theme="dark"] .invoice-app :is(.btn-primary,.login-scene .btn-primary){background:#c9e8d7;color:#173d2d;border-color:#c9e8d7}
+
+/* Paper-first Invoice Studio navigation and controls. Keep document previews neutral. */
+.invoice-app .sidebar{background:#17221d;color:#ccd9cf}
+.invoice-app .sidebar .brand{margin-bottom:24px;color:#eef4ee}
+.invoice-app .sidebar .brand small{color:#9eb0a0}
+.invoice-app .sidebar-label{color:#96aa9c}
+.invoice-app .sidebar .nav-link{color:#bed0c4}
+.invoice-app .sidebar .nav-link:hover{background:#294233;color:#fff}
+.invoice-app .sidebar .nav-link.selected{background:#355042;box-shadow:inset 3px 0 0 #9ed6b9;color:#f5fff7}
+.invoice-app .sidebar .nav-link.selected svg{color:#a5e5c6}
+.invoice-app .sidebar-tip{background:#24352b;border-color:#3f5a48}
+.invoice-app .sidebar-tip p{color:#b4c3b9}
+.invoice-app .sidebar-tip button{background:#476b56}
+.invoice-app .apps-back-link{color:#b9d0bd;margin:0 0 10px}
+.invoice-app .apps-back-link:hover{background:#ffffff16;color:#fff}
+.invoice-app .topbar{background:#fffdf6;border-color:#e0e0d6}
+.invoice-app .hero-panel{background:#173f32}
+.invoice-app .hero-panel::before{background:radial-gradient(circle at 84% 7%,rgba(167,216,178,.25),transparent 37%),linear-gradient(110deg,#244735,#173c31)}
+.invoice-app .hero-copy h2 em{color:#bcdfc7}
+.invoice-app .hero-kicker,.invoice-app .hero-copy p{color:#d0e0cf}
+.invoice-app .mock-logo{background:#54836e}.invoice-app .mock-total b{color:#376a57}
+.invoice-app .form-card,.invoice-app .list-container{border-radius:12px}
+.invoice-app .card-icon{background:#e8f0e8;color:#396e52}
+.invoice-app .field-label{color:var(--invoice-muted)}
+.invoice-app .btn-outline{background:#fffcf4;color:#384c3a;border-color:#d5ddd2}
+.invoice-app .btn-primary:not(:disabled):hover{background:#375b48}
+.invoice-app .page-foot{color:#687c6b}
+:root[data-theme="dark"] .invoice-app .topbar{background:#19231d;border-color:#344d3e;color:#e3eee7}
+:root[data-theme="dark"] .invoice-app .content{color:#e8f0e9}
+:root[data-theme="dark"] .invoice-app :is(.metric-card,.form-card,.list-container,.appearance-editor,.empty,.guest-banner,.tracking-toolbar,.item-block,.topbar,.table-scroll){background:#1d2a23;color:#e6eee6;border-color:#385140}
+:root[data-theme="dark"] .invoice-app :is(.invoice-table thead,.invoice-table tbody tr,.invoice-table td,.list-toolbar){background:#1d2a23;color:#e6eee6;border-color:#385140}
+:root[data-theme="dark"] .invoice-app :is(.page-intro h1,.editor-title h1,.metric-card strong,.invoice-table td:first-child strong,.invoice-table .amount-cell,.breadcrumb b,.table-client){color:#e7eee8}
+:root[data-theme="dark"] .invoice-app :is(.btn-outline,.btn-muted,.btn-white){background:#293d31;color:#e6f1e8;border-color:#476351}
+:root[data-theme="dark"] .invoice-app :is(.form-card input,.form-card select,.form-card textarea,.tracking-dialog input){background:#142119;color:#e6f4e8;border-color:#46604d}
+:root[data-theme="light"] .invoice-app .shell{background:#f4f2ec}

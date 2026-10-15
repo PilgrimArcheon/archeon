@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import { Manrope } from "next/font/google";
 import "./globals.css";
 import "./classic.css";
 import "./monochrome.css";
@@ -9,6 +10,8 @@ import "./gamedev.css";
 import "@/styles/archeon-app-tokens.css";
 import { SiteShell } from "@/components/layout/SiteShell";
 import { site } from "@/data/site";
+
+const manrope = Manrope({ subsets: ["latin"], display: "swap", variable: "--font-manrope" });
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ||
@@ -57,18 +60,8 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={manrope.variable} suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
-          rel="stylesheet"
-        />
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
       </head>
       <body className="min-h-screen antialiased">
