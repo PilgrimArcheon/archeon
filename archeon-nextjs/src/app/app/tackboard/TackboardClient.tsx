@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointer
 import {
   ArrowDownToLine, ArrowLeft, Archive, ArrowUpRight, Check, CheckCheck, ChevronDown, CircleHelp, Cloud, CloudOff, Monitor, Moon, Sun, Link2, Copy, RefreshCw,
   ClipboardList, Grip, Menu, MoreHorizontal, Pencil, Pin, Plus, RotateCcw, Clock3,
-  Search, Share2, Trash2, X,
+  Search, Share2, Trash2, Maximize2, Minimize2, X,
 } from "lucide-react";
 import {
   allTasksComplete, COLORS, freshId, makeBoard, makeNote, progress, readStore,
@@ -14,6 +14,7 @@ import {
 } from "@/features/tackboard/model";
 import styles from "./tackboard.module.css";
 import { useTackCloud } from "@/features/tackboard/useTackCloud";
+import { clampNotePosition, draggedNotePosition, edgeScrollVelocity, workspaceDimensions } from "@/features/tackboard/workspaceGeometry";
 
 type Dialog = "note" | "board" | "rename" | "help" | null;
 type Filter = "all" | NoteStatus;
@@ -87,17 +88,44 @@ export default function TackboardClient() {
   const [lastArchived, setLastArchived] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
   const boardRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const [boardFocused, setBoardFocused] = useState(false);
+  const [frontNoteId, setFrontNoteId] = useState<string | null>(null);
+  useEffect(() => {
+    try { setBoardFocused(localStorage.getItem("archeon:tackboard:expanded-board") === "1"); }
+    catch { /* Browser storage is optional. */ }
+  }, []);
+  const toggleBoardFocus = () => {
+    const next = !boardFocused;
+    setBoardFocused(next);
+    try { localStorage.setItem("archeon:tackboard:expanded-board", next ? "1" : "0"); }
+    catch { /* Keep the control usable without storage. */ }
+  };
   const importRef = useRef<HTMLInputElement>(null);
   const pendingArchive = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  const peelFlights = useRef<Map<string, { element: HTMLElement; animation: Animation | null }>>(new Map());
+  const removePeelFlight = (id: string) => {
+    const flight = peelFlights.current.get(id);
+    if (!flight) return;
+    peelFlights.current.delete(id);
+    flight.animation?.cancel();
+    flight.element.remove();
+  };
   // Track pointer movement outside React's render loop. A board write happens only on release.
   const draggingRef = useRef<{
     id: string; pointer: number; startX: number; startY: number;
     x: number; y: number; nextX: number; nextY: number; layer: number;
-    element: HTMLElement; handle: HTMLButtonElement; frame: number | null;
+    element: HTMLElement; handle: HTMLElement; frame: number | null;
+    scrollX: number; scrollY: number; clientX: number; clientY: number;
   } | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
-  useEffect(() => () => { pendingArchive.current.forEach(clearTimeout); pendingArchive.current.clear(); }, []);
+  useEffect(() => () => {
+    pendingArchive.current.forEach(clearTimeout);
+    pendingArchive.current.clear();
+    peelFlights.current.forEach(({ element, animation }) => { animation?.cancel(); element.remove(); });
+    peelFlights.current.clear();
+  }, []);
   useEffect(() => {
     if (!lastArchived && !notice) return;
     const timer = setTimeout(() => { setLastArchived(null); setNotice(""); }, 7000);
@@ -106,6 +134,10 @@ export default function TackboardClient() {
 
   const boardId = data?.boards.some(board => board.id === selectedBoard) ? selectedBoard : data?.activeBoardId ?? "";
   const board = data?.boards.find(item => item.id === boardId);
+  useEffect(() => {
+    // Each board starts from its own top-left; don't strand notes off-screen after switching.
+    if (viewportRef.current) { viewportRef.current.scrollLeft = 0; viewportRef.current.scrollTop = 0; }
+  }, [boardId]);
   const boardNotes = useMemo(() => data?.notes.filter(note => note.boardId === boardId) ?? [], [data, boardId]);
   const activeNotes = useMemo(() => boardNotes.filter(note => !note.archivedAt), [boardNotes]);
   const archivedNotes = useMemo(() => boardNotes.filter(note => !!note.archivedAt), [boardNotes]);
@@ -116,24 +148,28 @@ export default function TackboardClient() {
   }).sort((a, b) => a.layer - b.layer), [activeNotes, archivedNotes, filter, search, showArchive]);
   const totalTasks = activeNotes.reduce((total, note) => total + progress(note).total, 0);
   const completeTasks = activeNotes.reduce((total, note) => total + progress(note).done, 0);
-  const canvasHeight = Math.max(730, ...boardNotes.map(note => note.y + 365));
-  // On touch screens the full spatial board scrolls horizontally instead of collapsing to a grid.
-  const canvasWidth = Math.max(850, ...boardNotes.map(note => note.x + 280));
+  // Leave working space beyond the current notes. Both axes scroll within the board viewport.
+  // Long checklists can make a note taller than its minimum CSS height.
+  // Leave enough canvas for every note, even when a board contains 35 tasks.
+  const noteHeight = (note: Note) => Math.max(265, 175 + (note.body ? 75 : 0) + Math.min(285, note.tasks.length * 40));
+  const { width: canvasWidth, height: canvasHeight } = workspaceDimensions(
+    boardNotes.map(note => ({ x: note.x, y: note.y, width: 247, height: noteHeight(note) })),
+  );
 
   const chooseBoard = (id: string) => {
     setSelectedBoard(id);
     // Selection is a per-device preference, not a cloud document edit.
     try { localStorage.setItem("archeon:tackboard:selected-board", id); } catch { /* optional preference */ }
-    setShowArchive(false); setFilter("all"); setSearch(""); setMobileNav(false);
+    setShowArchive(false); setFilter("all"); setSearch(""); setMobileNav(false); setFrontNoteId(null);
   };
   const startNote = () => {
     if (!boardId) return;
     const draftNote = makeNote(boardId, activeNotes.length);
     // Keep newly created notes visible even on narrower canvases.
-    const canvasWidth = boardRef.current?.clientWidth ?? 1000;
-    const columns = Math.max(1, Math.floor((canvasWidth - 38) / 272));
-    draftNote.x = 26 + (activeNotes.length % columns) * 272;
-    draftNote.y = 28 + Math.floor(activeNotes.length / columns) * 312;
+    const visibleWidth = viewportRef.current?.clientWidth ?? 1000;
+    const columns = Math.max(1, Math.floor((visibleWidth - 40) / 272));
+    draftNote.x = 26 + (activeNotes.length % columns) * 272 + (viewportRef.current?.scrollLeft ?? 0);
+    draftNote.y = 28 + Math.floor(activeNotes.length / columns) * 312 + (viewportRef.current?.scrollTop ?? 0);
     setFilter("all"); setDraft(draftNote); setDialog("note");
   };
   const editNote = (note: Note) => { setDraft(structuredClone(note)); setDialog("note"); };
@@ -151,24 +187,59 @@ export default function TackboardClient() {
     const timer = pendingArchive.current.get(id);
     if (timer) clearTimeout(timer);
     pendingArchive.current.delete(id);
+    removePeelFlight(id);
     setAnimating(ids => ids.filter(v => v !== id));
     patchNote(id, n => ({ ...n, status: "done", archivedAt: now() }));
     setLastArchived(id);
   };
-  const queueArchive = (id: string) => {
+  const queueArchive = (id: string, checklistComplete = false) => {
     if (pendingArchive.current.has(id)) return;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const original = Array.from(boardRef.current?.querySelectorAll<HTMLElement>("[data-note-id]") ?? [])
+      .find(item => item.dataset.noteId === id);
+    // A fixed visual copy is not clipped by the scrolling board or its stacking context.
+    // The real note remains in the document until the animation completes.
+    if (!reducedMotion && original && typeof original.animate === "function") {
+      const bounds = original.getBoundingClientRect();
+      const flight = original.cloneNode(true) as HTMLElement;
+      flight.classList.remove(styles.dragging, styles.peeling);
+      flight.classList.add(styles.peelFlight);
+      flight.removeAttribute("data-note-id");
+      flight.setAttribute("aria-hidden", "true");
+      flight.querySelectorAll("[id]").forEach(item => item.removeAttribute("id"));
+      if (checklistComplete) flight.querySelectorAll<HTMLInputElement>('input[type="checkbox"]').forEach(input => { input.checked = true; });
+      const completedStamp = document.createElement("span");
+      completedStamp.className = styles.peelBadge;
+      completedStamp.textContent = checklistComplete ? "All done!" : "Peeling away";
+      flight.appendChild(completedStamp);
+      Object.assign(flight.style, {
+        position: "fixed", left: `${bounds.left}px`, top: `${bounds.top}px`,
+        width: `${bounds.width}px`, height: `${bounds.height}px`, margin: "0",
+        transform: "none", zIndex: "10010", pointerEvents: "none",
+      });
+      document.body.appendChild(flight);
+      const animation = flight.animate([
+        { offset: 0, opacity: 1, transform: "translate3d(0,0,0) rotate(0deg) scale(1)" },
+        { offset: .25, opacity: 1, transform: "translate3d(-5px,-8px,0) rotate(-5deg) scale(1.04)" },
+        { offset: .55, opacity: 1, transform: "translate3d(20px,-60px,0) rotate(-13deg) scale(.98)" },
+        { offset: .83, opacity: .9, transform: "translate3d(65px,-125px,0) rotate(-23deg) scale(.88)" },
+        { offset: 1, opacity: 0, transform: "translate3d(130px,-205px,0) rotate(-36deg) scale(.68)" },
+      ], { duration: 1750, easing: "cubic-bezier(.26,.05,.26,1)", fill: "forwards" });
+      peelFlights.current.set(id, { element: flight, animation });
+      animation.onfinish = () => { if (pendingArchive.current.has(id)) archiveNote(id); };
+    }
     setAnimating(ids => [...ids, id]);
-    // Fallback for hidden tabs / disabled animations; normal completion uses animationend.
-    const timer = setTimeout(() => { archiveNote(id); }, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 150 : 1750);
-    pendingArchive.current.set(id, timer);
+    // Timeout also covers background tabs and browsers that suspend animations.
+    pendingArchive.current.set(id, setTimeout(() => archiveNote(id), reducedMotion ? 140 : 1920));
   };
   const toggleTask = (note: Note, taskId: string) => {
     const next = { ...note, status: note.status === "planned" ? "active" as const : note.status,
       tasks: note.tasks.map(t => t.id === taskId ? { ...t, done: !t.done } : t) };
     patchNote(note.id, () => next);
-    if (allTasksComplete(next)) queueArchive(note.id);
+    if (allTasksComplete(next)) queueArchive(note.id, true);
     else if (pendingArchive.current.has(note.id)) {
       clearTimeout(pendingArchive.current.get(note.id)); pendingArchive.current.delete(note.id);
+      removePeelFlight(note.id);
       setAnimating(ids => ids.filter(id => id !== note.id));
     }
   };
@@ -225,21 +296,35 @@ export default function TackboardClient() {
     if (!window.confirm("Replace all notes and boards on this device with this backup?")) return;
     replaceData(imported); setSelectedBoard(imported.activeBoardId); setShowArchive(false); setNotice("Backup imported successfully.");
   };
-  const dragStart = (event: ReactPointerEvent<HTMLButtonElement>, note: Note) => {
-    // Pointer Events support mouse, pen, and iOS/Android touch. The handle disables
-    // touch panning, while the rest of the board remains horizontally scrollable.
+  const nudgeNote = (note: Note, dx: number, dy: number) => {
+    const positioned = clampNotePosition({ x: note.x + dx, y: note.y + dy },
+      { width: canvasWidth, height: canvasHeight }, { width: 247, height: noteHeight(note) });
+    const newX = positioned.x;
+    const newY = positioned.y;
+    mutate(previous => ({ ...previous, notes: previous.notes.map(item => item.id === note.id
+      ? { ...item, x: newX, y: newY, updatedAt: now() } : item) }));
+    setFrontNoteId(note.id);
+  };
+  const dragStart = (event: ReactPointerEvent<HTMLElement>, note: Note) => {
+    // Anywhere on the note's top strip is a drag surface except actionable controls.
+    // The edit button remains independently clickable and accessible to keyboard users.
     if (event.button !== 0 || showArchive || draggingRef.current) return;
+    if ((event.target as HTMLElement).closest('[data-note-action="true"]')) return;
     const element = event.currentTarget.closest("article") as HTMLElement | null;
     if (!element) return;
-    event.preventDefault();
+    if (event.pointerType !== "mouse") event.preventDefault();
     const highest = Math.max(0, ...(data?.notes.map(item => item.layer) ?? []));
-    const layer = Math.min(100000, highest + 1);
+    const layer = highest + 1;
     const handle = event.currentTarget;
     handle.setPointerCapture(event.pointerId);
-    element.style.zIndex = String(layer);
+    element.style.zIndex = "10000";
+    setFrontNoteId(note.id);
     draggingRef.current = {
       id: note.id, pointer: event.pointerId, startX: event.clientX, startY: event.clientY,
-      x: note.x, y: note.y, nextX: note.x, nextY: note.y, layer,
+      clientX: event.clientX, clientY: event.clientY,
+      scrollX: viewportRef.current?.scrollLeft ?? 0, scrollY: viewportRef.current?.scrollTop ?? 0,
+      x: element.offsetLeft, y: element.offsetTop,
+      nextX: element.offsetLeft, nextY: element.offsetTop, layer,
       element, handle, frame: null,
     };
     document.body.style.userSelect = "none";
@@ -251,34 +336,74 @@ export default function TackboardClient() {
       const drag = draggingRef.current;
       if (!drag) return;
       drag.frame = null;
+      const viewport = viewportRef.current;
+      let scrolled = false;
+      if (viewport) {
+        // Auto-scroll when a dragged note reaches the visible edges, on both axes.
+        const rect = viewport.getBoundingClientRect();
+        const { x: dx, y: dy } = edgeScrollVelocity(drag.clientX, drag.clientY, rect);
+        if (dx || dy) {
+          const beforeX = viewport.scrollLeft;
+          const beforeY = viewport.scrollTop;
+          viewport.scrollBy(dx, dy);
+          scrolled = beforeX !== viewport.scrollLeft || beforeY !== viewport.scrollTop;
+        }
+      }
+      const position = draggedNotePosition({
+        origin: { x: drag.x, y: drag.y },
+        pointerStart: { x: drag.startX, y: drag.startY },
+        pointerCurrent: { x: drag.clientX, y: drag.clientY },
+        scrollStart: { x: drag.scrollX, y: drag.scrollY },
+        scrollCurrent: { x: viewport?.scrollLeft ?? 0, y: viewport?.scrollTop ?? 0 },
+        canvas: { width: boardRef.current?.clientWidth ?? 1500, height: boardRef.current?.clientHeight ?? 1050 },
+        note: { width: drag.element.offsetWidth, height: drag.element.offsetHeight },
+      });
+      drag.nextX = position.x;
+      drag.nextY = position.y;
       drag.element.style.setProperty("--drag-x", `${drag.nextX - drag.x}px`);
       drag.element.style.setProperty("--drag-y", `${drag.nextY - drag.y}px`);
+      if (viewport) {
+        const rect = viewport.getBoundingClientRect();
+        const atEdge = drag.clientX < rect.left + 58 || drag.clientX > rect.right - 58 ||
+          drag.clientY < rect.top + 58 || drag.clientY > rect.bottom - 58;
+        if (atEdge && scrolled) drag.frame = window.requestAnimationFrame(paintDrag);
+      }
     };
     const move = (event: PointerEvent) => {
       const drag = draggingRef.current;
       if (!drag || event.pointerId !== drag.pointer) return;
-      const maxX = Math.max(0, (boardRef.current?.clientWidth ?? 1150) - drag.element.offsetWidth);
-      drag.nextX = Math.max(0, Math.min(maxX, drag.x + event.clientX - drag.startX));
-      // Keep the whole note visible; the board grows when notes are added below.
-      const maxY = Math.max(0, (boardRef.current?.clientHeight ?? 730) - drag.element.offsetHeight - 8);
-      drag.nextY = Math.max(0, Math.min(maxY, drag.y + event.clientY - drag.startY));
+      drag.clientX = event.clientX;
+      drag.clientY = event.clientY;
       if (drag.frame === null) drag.frame = window.requestAnimationFrame(paintDrag);
     };
     const finish = (event: PointerEvent) => {
       const drag = draggingRef.current;
       if (!drag || event.pointerId !== drag.pointer) return;
-      move(event);
+      drag.clientX = event.clientX;
+      drag.clientY = event.clientY;
       if (drag.frame !== null) cancelAnimationFrame(drag.frame);
+      // Calculate final coordinates even if the final pointer event was between frames.
+      const viewport = viewportRef.current;
+      const position = draggedNotePosition({
+        origin: { x: drag.x, y: drag.y },
+        pointerStart: { x: drag.startX, y: drag.startY },
+        pointerCurrent: { x: drag.clientX, y: drag.clientY },
+        scrollStart: { x: drag.scrollX, y: drag.scrollY },
+        scrollCurrent: { x: viewport?.scrollLeft ?? 0, y: viewport?.scrollTop ?? 0 },
+        canvas: { width: boardRef.current?.clientWidth ?? 1500, height: boardRef.current?.clientHeight ?? 1050 },
+        note: { width: drag.element.offsetWidth, height: drag.element.offsetHeight },
+      });
+      drag.nextX = position.x;
+      drag.nextY = position.y;
       draggingRef.current = null;
       document.body.style.userSelect = "";
-      // Update the DOM position before removing its temporary transform, avoiding a snap-back.
       drag.element.style.left = `${drag.nextX}px`;
       drag.element.style.top = `${drag.nextY}px`;
       drag.element.style.removeProperty("--drag-x");
       drag.element.style.removeProperty("--drag-y");
       if (drag.handle.hasPointerCapture(drag.pointer)) drag.handle.releasePointerCapture(drag.pointer);
       setDraggingId(null);
-      if (drag.nextX !== drag.x || drag.nextY !== drag.y || drag.layer > 0) {
+      if (drag.nextX !== drag.x || drag.nextY !== drag.y) {
         mutate(previous => ({ ...previous, notes: previous.notes.map(note => note.id === drag.id
           ? { ...note, x: drag.nextX, y: drag.nextY, layer: drag.layer, updatedAt: now() }
           : note) }));
@@ -300,7 +425,7 @@ export default function TackboardClient() {
   }, [mutate]);
 
   if (!ready || !data) return <div className={styles.loading}>Loading your board<span>…</span></div>;
-  return <div className={`${styles.app} archeon-app-surface`} data-tack-theme={theme}>
+  return <div className={`${styles.app} ${boardFocused ? styles.boardFocused : ""} archeon-app-surface`} data-tack-theme={theme}>
     <aside className={`${styles.sidebar} ${mobileNav ? styles.sidebarOpen : ""}`} aria-label="Tackboard sidebar">
       <div className={styles.brand}><div className={styles.brandMark}><Image src="/images/tackboard-icon.png" alt="" width={35} height={35}/></div><div><strong>tackboard<span>.</span></strong><small>Make room for doing.</small></div><button className={styles.mobileClose} onClick={() => setMobileNav(false)} aria-label="Close navigation"><X size={18}/></button></div>
       <Link className={styles.allAppsLink} href="/app"><ArrowLeft size={15}/> All apps</Link>
@@ -364,13 +489,34 @@ export default function TackboardClient() {
         <div className={styles.summaryRow}><div className={styles.summaryUnit}><strong>{String(activeNotes.length).padStart(2,"0")}</strong><span>ON THE BOARD</span></div><div className={styles.summaryUnit}><strong>{String(completeTasks).padStart(2,"0")} <em>/ {String(totalTasks).padStart(2,"0")}</em></strong><span>TASKS TICKED OFF</span></div><div className={styles.summaryUnit}><strong>{String(archivedNotes.length).padStart(2,"0")}</strong><span>NOTES PEELED AWAY</span></div><div className={styles.summaryProgress}><span>SMALL STEPS ADD UP</span><div><i style={{width:`${totalTasks ? Math.round(completeTasks/totalTasks*100) : 0}%`}} /></div></div></div>
         <div className={styles.toolsRow}><div className={styles.filterTabs} aria-label="Filter notes">{!showArchive ? <><button className={filter === "all" ? styles.currentFilter : ""} onClick={() => setFilter("all")}>All notes</button>{STATUSES.filter(s => s.id !== "done").map(s => <button className={filter === s.id ? styles.currentFilter : ""} key={s.id} onClick={() => setFilter(s.id)}>{s.label}</button>)}</> : <button className={styles.currentFilter} onClick={() => setShowArchive(false)}>Completed <X size={13}/></button>}</div><label className={styles.searchBox}><Search size={16}/><input value={search} onChange={e => setSearch(e.target.value)} placeholder="Find a note..." aria-label="Search notes"/></label></div>
         <section className={styles.canvasSection} aria-label={showArchive ? "Completed sticky notes" : "Sticky note board"}>
-          <div className={styles.canvasMeta}><span><Pin size={14}/> {showArchive ? "ARCHIVED NOTES" : "THE PINBOARD"}</span><span>{showArchive ? "RESTORE ANYTIME" : "DRAG NOTES BY THE GRIP · TAP ··· TO EDIT"}</span></div>
-          <div ref={boardRef} className={`${styles.boardCanvas} ${showArchive ? styles.archiveCanvas : ""}`} style={{ minHeight: showArchive ? 460 : canvasHeight, minWidth: canvasWidth }}>
+          <div className={styles.canvasMeta}>
+            <span><Pin size={14}/> {showArchive ? "ARCHIVED NOTES" : "THE PINBOARD"}</span>
+            <div className={styles.canvasControls}>
+              <span>{showArchive ? "RESTORE ANYTIME" : "SCROLL BOTH WAYS · DRAG FROM THE TOP"}</span>
+              <button type="button" className={styles.boardFocusButton} onClick={toggleBoardFocus} aria-pressed={boardFocused} title={boardFocused ? "Minimize pinboard workspace" : "Expand pinboard workspace"}>
+                {boardFocused ? <Minimize2 size={15}/> : <Maximize2 size={15}/>}
+                <span>{boardFocused ? "Minimize" : "Expand"}</span>
+              </button>
+            </div>
+          </div>
+          <div ref={viewportRef} className={styles.boardViewport} tabIndex={0} role="region" aria-label="Scrollable pinboard. Scroll horizontally or vertically to explore your notes.">
+          <div ref={boardRef} className={`${styles.boardCanvas} ${showArchive ? styles.archiveCanvas : ""}`} style={{ minHeight: showArchive ? 460 : canvasHeight, minWidth: showArchive ? "100%" : canvasWidth }}>
             {displayed.length === 0 ? <div className={styles.empty}><div className={styles.emptyIcon}><ClipboardList size={28}/></div><h2>{search ? "No matching notes." : showArchive ? "Nothing peeled away yet." : "A fresh page."}</h2><p>{search ? "Try searching for something else." : showArchive ? "Finished notes will appear here." : "Every good plan starts with one note."}</p>{!showArchive && !search && <button className={styles.primaryButton} onClick={startNote}><Plus size={17}/> Create your first note</button>}</div> : displayed.map(note => {
               const amount = progress(note);
-              return <article key={note.id} className={`${styles.sticky} ${styles[`color_${note.color}`]} ${animating.includes(note.id) ? styles.peeling : ""} ${draggingId === note.id ? styles.dragging : ""}`} style={{ left: note.x, top: note.y, zIndex: Math.max(1,note.layer) }} onAnimationEnd={e => { if (e.target === e.currentTarget && e.animationName.includes("peelAway") && pendingArchive.current.has(note.id)) archiveNote(note.id); }} onDoubleClick={() => editNote(note)} aria-label={`${note.title}, ${amount.done} of ${amount.total} tasks completed`}>
-                <div className={styles.noteTop}><button className={styles.dragHandle} title="Drag note" aria-label={`Drag ${note.title}`} onPointerDown={e => dragStart(e,note)}><Grip size={18}/></button><span className={styles.noteStatus}>{STATUSES.find(s => s.id === note.status)?.label.toUpperCase()}</span><button className={styles.noteEdit} title="Edit note" aria-label={`Edit ${note.title}`} onClick={() => editNote(note)}><MoreHorizontal size={19}/></button></div>
-                <h3>{note.title}</h3>{note.body && <p className={styles.noteBody}>{note.body}</p>}
+              const bounded = clampNotePosition({ x: note.x, y: note.y },
+                { width: canvasWidth, height: canvasHeight }, { width: 247, height: noteHeight(note) });
+              return <article key={note.id} data-note-id={note.id} className={`${styles.sticky} ${styles[`color_${note.color}`]} ${animating.includes(note.id) ? styles.peeling : ""} ${peelFlights.current.has(note.id) ? styles.peelSourceHidden : ""} ${draggingId === note.id ? styles.dragging : ""}`} style={{ left: bounded.x, top: bounded.y, zIndex: frontNoteId === note.id ? 10000 : Math.min(9999, Math.max(1,note.layer)) }} onPointerDownCapture={() => setFrontNoteId(note.id)} onDoubleClick={() => editNote(note)} aria-label={`${note.title}, ${amount.done} of ${amount.total} tasks completed`}>
+                <div className={styles.noteTop} onPointerDown={e => dragStart(e,note)} title="Drag from anywhere on this top edge">
+                  <button type="button" className={styles.dragHandle} title="Drag or use arrow keys to move note" aria-label={`Move ${note.title}. Drag or use arrow keys.`} onKeyDown={e => {
+                    const delta = e.shiftKey ? 50 : 20;
+                    const directions: Record<string, [number,number]> = {ArrowLeft: [-delta,0], ArrowRight:[delta,0], ArrowUp:[0,-delta], ArrowDown:[0,delta]};
+                    const step = directions[e.key];
+                    if (step) { e.preventDefault(); nudgeNote(note, step[0], step[1]); }
+                  }}><Grip size={18}/></button>
+                  <span className={styles.noteStatus}>{STATUSES.find(s => s.id === note.status)?.label.toUpperCase()}</span>
+                  <button className={styles.noteEdit} data-note-action="true" title="Edit note" aria-label={`Edit ${note.title}`} onClick={() => editNote(note)}><MoreHorizontal size={19}/></button>
+                </div>
+                <h3 className={styles.noteDragTitle} onPointerDown={e => dragStart(e,note)} title="Drag to reposition · double-click to edit">{note.title}</h3>{note.body && <p className={styles.noteBody}>{note.body}</p>}
                 {note.tasks.length > 0 && <ul className={styles.taskList}>{note.tasks.map(task => <li key={task.id}><label className={`${styles.taskLabel} ${task.done ? styles.taskDone : ""}`}><input type="checkbox" checked={task.done} onChange={() => toggleTask(note, task.id)} disabled={showArchive} /><span className={styles.taskCheck}><Check size={12}/></span><span className={styles.taskText}>{task.text}</span></label></li>)}</ul>}
                 <div className={styles.noteFooter}><span>{amount.total > 0 ? `${amount.done}/${amount.total} done` : `Added ${displayDate(note.createdAt)}`}</span><button aria-label={showArchive ? `Restore ${note.title}` : `Peel ${note.title} off the board`} title={showArchive ? "Restore note" : "Peel note off the board"} onClick={() => showArchive ? restoreNote(note.id) : queueArchive(note.id)}>{showArchive ? <RotateCcw size={16}/> : <ArrowUpRight size={16}/>}</button></div>
                 {amount.total > 0 && <div className={styles.noteProgress}><i style={{ width:`${amount.done/amount.total*100}%` }}/></div>}
@@ -378,6 +524,7 @@ export default function TackboardClient() {
               </article>;
             })}
             {!showArchive && displayed.length > 0 && !search && filter === "all" && <button className={styles.addOnCanvas} onClick={startNote}><Plus size={25}/><span>New note</span></button>}
+          </div>
           </div>
         </section>
         <div className={styles.pageFoot}><span>Small things become big things. One note at a time.</span><span>tackboard. / built by <Link href="/">archeon</Link></span></div>
@@ -394,7 +541,7 @@ export default function TackboardClient() {
           <div className={styles.twoFields}><label className={styles.fieldLabel}>STATUS<select value={draft.status} onChange={e => setDraft({ ...draft, status: e.target.value as NoteStatus })}>{STATUSES.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}</select></label><div className={styles.fieldLabel}>PAPER COLOR<div className={styles.colorChoices}>{COLORS.map(color => <button type="button" key={color} title={noteColorNames[color]} aria-label={noteColorNames[color]} aria-pressed={draft.color === color} className={`${styles.colorChoice} ${styles[`color_${color}`]} ${draft.color === color ? styles.colorChosen : ""}`} onClick={() => setDraft({ ...draft, color })}>{draft.color === color && <Check size={14}/>}</button>)}</div></div></div>
           <div className={styles.editorTasks}><div className={styles.editorTasksTop}><span>CHECKLIST <small>({draft.tasks.length}/35)</small></span><button type="button" onClick={() => { if (draft.tasks.length < 35) setDraft({ ...draft, tasks:[...draft.tasks,{id:freshId(),text:"",done:false}] }); }}><Plus size={15}/> Add task</button></div>{draft.tasks.map((task,i) => <div key={task.id} className={styles.editorTask}><button aria-label={task.done ? "Mark incomplete" : "Mark complete"} title="Toggle completed" type="button" onClick={() => setDraft({ ...draft, tasks:draft.tasks.map(t => t.id === task.id ? {...t,done:!t.done} : t) })}><span className={task.done ? styles.editorChecked : styles.editorUnchecked}>{task.done && <Check size={13}/>}</span></button><input aria-label={`Task ${i+1}`} placeholder={`Task ${i+1}`} value={task.text} maxLength={180} onChange={e => setDraft({ ...draft, tasks:draft.tasks.map(t => t.id === task.id ? {...t,text:e.target.value} : t) })}/><button aria-label={`Remove task ${i+1}`} title="Remove task" type="button" onClick={() => setDraft({ ...draft, tasks:draft.tasks.filter(t => t.id !== task.id) })}><X size={15}/></button></div>)}</div>
           <div className={styles.modalActions}>{data.notes.some(n => n.id === draft.id) && <button type="button" className={styles.deleteButton} onClick={() => removeNote(draft.id)}><Trash2 size={15}/> Delete</button>}<button type="button" className={styles.secondaryButton} onClick={() => { setDialog(null); setDraft(null); }}>Cancel</button><button type="submit" className={styles.primaryButton}><Check size={16}/> Save note</button></div></form>}
-        {dialog === "help" && <div className={styles.helpContent}><div><Pin size={19}/><p><strong>Stick your thoughts down.</strong> Add boards, sticky notes, and as many as 35 checklist tasks per note.</p></div><div><Grip size={19}/><p><strong>Arrange your board.</strong> Drag a note by its grip with your finger or mouse. Tap the three dots to edit.</p></div><div><CheckCheck size={19}/><p><strong>Peel away finished notes.</strong> Complete every checklist task to trigger an animation and move the note to Completed. You can restore it later.</p></div><div><Share2 size={19}/><p><strong>Synced across devices.</strong> Sign in with your Archeon account to back up your personal boards. Connect TackBoard Desktop from the sidebar. Shared editing and invitations are a separate future feature.</p></div><button className={styles.primaryButton} onClick={() => setDialog(null)}>Got it <Check size={16}/></button></div>}
+        {dialog === "help" && <div className={styles.helpContent}><div><Pin size={19}/><p><strong>Stick your thoughts down.</strong> Add boards, sticky notes, and as many as 35 checklist tasks per note.</p></div><div><Grip size={19}/><p><strong>Arrange your board.</strong> Drag a note from anywhere along its top edge with your finger or mouse. Tap the three dots to edit. Scroll the board in both directions, or expand it for more room.</p></div><div><CheckCheck size={19}/><p><strong>Peel away finished notes.</strong> Complete every checklist task to trigger an animation and move the note to Completed. You can restore it later.</p></div><div><Share2 size={19}/><p><strong>Synced across devices.</strong> Sign in with your Archeon account to back up your personal boards. Connect TackBoard Desktop from the sidebar. Shared editing and invitations are a separate future feature.</p></div><button className={styles.primaryButton} onClick={() => setDialog(null)}>Got it <Check size={16}/></button></div>}
       </div>
     </div>}
   </div>;

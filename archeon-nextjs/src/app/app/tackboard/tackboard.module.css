@@ -163,3 +163,117 @@
 .dateChip{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-width:128px;height:36px;border:1px solid var(--archeon-app-border,#e0e3dc);border-radius:8px;padding:0 11px;background:var(--archeon-app-panel,#fafafa);color:var(--archeon-app-muted,#767d76);font-size:11px;font-weight:650;white-space:nowrap}
 .app[data-tack-theme="dark"] .dateChip{color:#bfc8bf;background:#202422;border-color:#3a403b}
 @media(max-width:560px){.dateChip{min-width:0;padding:0 8px;font-size:10px}.topbar{gap:10px}}
+
+/* Scrollable pinboard workspace. This viewport owns both scroll axes; the
+   canvas retains absolute note coordinates so mobile and desktop positions match. */
+.boardViewport{
+  width:100%;
+  height:clamp(470px,67dvh,820px);
+  overflow:auto;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+  scrollbar-width:thin;
+  scrollbar-color:#8b9b8a80 transparent;
+  outline-offset:-3px;
+}
+.boardViewport:focus-visible{outline:2px solid #89b4a0}
+.boardCanvas{min-width:100%;overflow:visible}
+.canvasSection{overflow:hidden}
+.noteTop{
+  cursor:grab;
+  touch-action:none;
+  -webkit-user-select:none;
+  user-select:none;
+  min-height:27px;
+  padding:4px 0;
+  margin:-4px 0 18px;
+}
+.noteTop:active{cursor:grabbing}
+.noteTop .dragHandle{pointer-events:none;display:grid;place-items:center}
+.noteTop .noteEdit{cursor:pointer;touch-action:manipulation}
+.boardFocusButton{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  border:1px solid var(--line)!important;
+  border-radius:8px;
+  padding:9px 13px;
+  background:var(--surface)!important;
+  font-size:11px!important;
+  font-weight:700!important;
+}
+.boardFocusButton:hover{filter:brightness(.96)}
+.app[data-tack-theme="dark"] .boardFocusButton{
+  background:#202523!important;border-color:#3b423d!important;color:#e3e9e3!important;
+}
+.boardFocused .sidebar{display:none}
+.boardFocused .workspace{max-width:none;padding:15px clamp(12px,2vw,32px) 10px}
+.boardFocused .headingRow{align-items:center;gap:14px}
+.boardFocused .headingRow h1{font-size:clamp(22px,2.3vw,30px);line-height:1.1}
+.boardFocused .eyebrow,.boardFocused .headingRow p,.boardFocused .summaryRow{display:none}
+.boardFocused .toolsRow{padding:10px 0 13px}
+.boardFocused .boardViewport{height:calc(100dvh - 247px);min-height:310px;max-height:none}
+.boardFocused .pageFoot{padding-top:8px}
+@media(max-width:1050px){
+  .boardViewport{height:clamp(430px,65dvh,750px);overflow:auto;-webkit-overflow-scrolling:touch}
+  .canvasSection{overflow:hidden}
+  .boardCanvas{position:relative;display:block;min-width:100%;max-width:none;padding:0}
+  .sticky{position:absolute;left:initial;top:initial;width:246px;min-height:265px;max-width:246px;margin:0}
+  .boardFocused .boardViewport{height:calc(100dvh - 260px)}
+}
+@media(max-width:760px){
+  .boardFocused .headingActions{width:auto}
+  .boardFocused .headingRow{flex-wrap:wrap}
+  .boardFocused .headingRow h1{font-size:26px}
+  .boardFocused .boardViewport{height:calc(100dvh - 290px);min-height:300px}
+}
+/* The title is part of the easy-to-grab top area, too. */
+.noteDragTitle{cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none}
+.noteDragTitle:active{cursor:grabbing}
+/* The grip stays keyboard-accessible even though the entire strip can be dragged. */
+.noteTop .dragHandle{pointer-events:auto;flex:none}
+
+.canvasControls{display:flex;align-items:center;justify-content:flex-end;gap:16px;min-width:0}
+.canvasControls>span{white-space:nowrap}
+.canvasMeta .boardFocusButton{padding:6px 10px;font-size:10px!important;letter-spacing:0;flex:none}
+.boardFocused .boardViewport{height:calc(100dvh - 205px)}
+@media(max-width:1050px){.canvasControls>span{display:none}}
+@media(max-width:760px){.boardFocused .boardViewport{height:calc(100dvh - 245px)}}
+
+/* v0.8 Pinboard boundaries and visible peel animation.
+   Contain per-note z-index inside the board; edit dialogs always appear above it. */
+.canvasSection{position:relative;isolation:isolate;z-index:0}
+.boardViewport{position:relative;isolation:isolate;z-index:0;overflow:auto}
+.boardCanvas{position:relative;isolation:isolate}
+.overlay{z-index:1000}
+/* Hide only when a flight clone exists. CSS remains the fallback for older browsers. */
+.peelSourceHidden,.peelSourceHidden:nth-of-type(n),.peelSourceHidden:hover{
+  visibility:hidden!important;
+  animation:none!important;
+  pointer-events:none!important;
+}
+/* Keep checklist-heavy notes bounded; all tasks remain reachable by scrolling inside. */
+.sticky .taskList{max-height:285px;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;overscroll-behavior:contain}
+/* Flight is fixed on document.body so neither axis of board scrolling clips it. */
+.peelFlight,.peelFlight:nth-of-type(n),.peelFlight:hover{
+  display:flex!important;
+  overflow:visible!important;
+  box-shadow:12px 24px 36px #15191745!important;
+  transform-origin:85% 10%;
+  will-change:transform,opacity;
+  pointer-events:none!important;
+}
+.peelFlight::after{
+  content:"";position:absolute;top:0;right:0;width:76px;height:76px;
+  background:linear-gradient(225deg,#fffef4ef 0%,#ffffffb5 45%,#ffffff22 46%,transparent 47%);
+  clip-path:polygon(100% 0,0 0,100% 100%);
+  filter:drop-shadow(-5px 7px 4px #0003);
+  animation:tackboardFold 1.75s ease both;
+}
+@keyframes tackboardFold{
+  0%,8%{transform:scale(0);transform-origin:100% 0;opacity:0}
+  28%,76%{transform:scale(1);transform-origin:100% 0;opacity:1}
+  100%{transform:scale(1.25);transform-origin:100% 0;opacity:.55}
+}
+@media(prefers-reduced-motion:reduce){.peelFlight::after{animation:none}}
+
+.peelFlight .peelBadge{z-index:5;animation:tackboardStamp 1.75s ease-in-out both}
+@keyframes tackboardStamp{0%,12%{opacity:0;transform:translate(-50%,-45%) rotate(6deg) scale(.85)}25%,72%{opacity:1;transform:translate(-50%,-50%) rotate(6deg) scale(1)}100%{opacity:0;transform:translate(-50%,-70%) rotate(9deg)}}

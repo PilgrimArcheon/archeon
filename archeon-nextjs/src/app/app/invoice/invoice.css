@@ -1,5 +1,5 @@
 /* Route-scoped: no portfolio globals or Tailwind preflight are modified. */
-.invoice-app { background: var(--page, #f7f8fb); color: var(--ink, #101524); font-family: "DM Sans", Arial, sans-serif; font-size:14px; min-height:100vh; width:100%; isolation:isolate; }
+.invoice-app { background: var(--page, #f7f8fb); color: var(--ink, #1b2233); font-family: "DM Sans", Arial, sans-serif; font-size:14px; min-height:100vh; width:100%; isolation:isolate; }
 .invoice-app, .invoice-app * { box-sizing:border-box; }
 .invoice-app .apps-back-link { display:flex; align-items:center; gap:9px; color:#aeb5d0; text-decoration:none; padding:10px 13px; margin: -19px 0 22px; border-radius:8px; font-size:12px; }
 .invoice-app .apps-back-link:hover { color:white; background:#ffffff12; }
@@ -127,7 +127,7 @@
 .invoice-app .sparkle{color:#e7b660}
 .invoice-app .page-foot{font-size:10px;color:#aab0bd;text-align:center;margin:44px 0 25px}
 .invoice-app .page-foot span{padding:0 8px}
-.invoice-app .hero-panel{height:257px;display:flex;background:#171b44;border-radius:17px;overflow:hidden;position:relative;color:white;margin-bottom:24px}
+.invoice-app .hero-panel{height:257px;display:flex;background:#292e67;border-radius:17px;overflow:hidden;position:relative;color:white;margin-bottom:24px}
 .invoice-app .hero-panel::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 84% 7%,#7277d45c,transparent 35%),linear-gradient(100deg,#2e3472,#292d66)}
 .invoice-app .hero-decoration{position:absolute;border:1px solid #ffffff16;border-radius:50%;pointer-events:none}
 .invoice-app .hero-a{height:420px;width:420px;right:60px;top:-194px}
@@ -899,3 +899,45 @@
 :root[data-theme="dark"] .invoice-app .hero-panel::before {background:radial-gradient(circle at 90% 0%,#4266882e,transparent 46%),linear-gradient(106deg,#0e1b2b,#152b40)}
 :root[data-theme="dark"] .invoice-app .content {background-image:radial-gradient(circle,#a7c8e013 .7px,transparent .95px);background-size:24px 24px}
 :root[data-theme="dark"] .invoice-app .login-scene {background:radial-gradient(circle at 80% 5%,#2947642b 0,transparent 46%),linear-gradient(130deg,#080d14,#101b28)}
+
+/* v0.8 Deep midnight paper. Same palette family, three steps darker in navy. */
+.invoice-app .sidebar{background:#09121d;border-color:#202f40}
+.invoice-app .sidebar .nav-link:hover{background:#122538}
+.invoice-app .sidebar .nav-link.selected{background:#1b3249}
+.invoice-app .sidebar-tip{background:#102334;border-color:#254059}
+.invoice-app .sidebar-tip button{background:#24415c}
+.invoice-app .hero-panel{background:#0d2134}
+.invoice-app .hero-panel::before{
+  background:radial-gradient(circle at 84% 8%,#2c55782e,transparent 43%),linear-gradient(108deg,#0a192a,#112d43)
+}
+.invoice-app :is(.btn-primary,.login-scene .btn-primary){background:#102e49;border-color:#102e49}
+.invoice-app .btn-primary:not(:disabled):hover{background:#1b4363}
+.invoice-app .mock-total b{color:#213d56}
+:root[data-theme="dark"] .invoice-app{
+  --page:#05080d;--card:#0a1019;--line:#1c2a39;
+  --invoice-bg:#05080d;--invoice-panel:#090f18;--invoice-raised:#101b2a;
+  --invoice-soft:#122134;--invoice-border:#1d2c3c;--invoice-contrast:#060c14;
+}
+:root[data-theme="dark"] .invoice-app :is(.shell,.guest-workspace,.main-column){background:#05080d}
+:root[data-theme="dark"] .invoice-app .content{
+  background-image:radial-gradient(circle,#a7c8e00d .7px,transparent .95px)
+}
+:root[data-theme="dark"] .invoice-app .sidebar{background:#070d16;border-color:#1d2c3c}
+:root[data-theme="dark"] .invoice-app .sidebar .nav-link.selected{background:#14293c}
+:root[data-theme="dark"] .invoice-app .sidebar-tip{background:#0d1b29;border-color:#23374b}
+:root[data-theme="dark"] .invoice-app .sidebar-tip button{background:#1b3b56}
+:root[data-theme="dark"] .invoice-app .topbar{background:#080f19;border-color:#1d2c3c}
+:root[data-theme="dark"] .invoice-app :is(.metric-card,.form-card,.list-container,.appearance-editor,.guest-banner,.login-card,.table-scroll,.tracking-toolbar,.item-block,.empty){
+  background:#0b1420;border-color:#223245;color:#e8f1fb
+}
+:root[data-theme="dark"] .invoice-app :is(.invoice-table thead,.invoice-table tbody tr,.invoice-table td,.list-toolbar){
+  background:#0b1420;border-color:#223245
+}
+:root[data-theme="dark"] .invoice-app :is(.btn-outline,.btn-muted,.btn-white){background:#102132;border-color:#2a4156}
+:root[data-theme="dark"] .invoice-app :is(.form-card input,.form-card select,.form-card textarea,.login-card input,.login-card select,.login-card textarea,.tracking-dialog input){
+  background:#08111b;border-color:#2b4055
+}
+:root[data-theme="dark"] .invoice-app .hero-panel{background:#0a1523;border-color:#223448}
+:root[data-theme="dark"] .invoice-app .hero-panel::before{
+  background:radial-gradient(circle at 90% 0%,#2a4a6726,transparent 46%),linear-gradient(108deg,#081421,#0e2235)
+}
